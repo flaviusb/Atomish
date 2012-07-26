@@ -10,7 +10,7 @@ import Text.Peggy
 import Data.Maybe
 
 -- This is only used to make the PreAtomishReader easier
--- The PreAtomReader does not understand read macros or MMOPery or syntax or layout
+-- The PreAtomishReader does not understand read macros or MMOPery or syntax or layout
 
 data MessageChain = MessageChain [Expression] deriving (Show, Data, Eq, Typeable)
 data Expression = Message String [MessageChain] | Brackets BracketType [MessageChain] | ELiteral Literal | Terminator deriving (Show, Data, Eq, Typeable)
