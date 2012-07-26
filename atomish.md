@@ -146,11 +146,11 @@ Datalang, query lang, qq lang ...
 Example:
 --------
 
-let page = #'(html
-               (head title \`\_)
-               (body
-                 div "a b c d e"
-                 div "c d e f g"
-                 (div \`\_)))
+        let page = #'(html
+                       (head title \`\_)
+                       (body
+                         div "a b c d e"
+                         div "c d e f g"
+                         (div \`\_)))
 
-Byeloblog render(page("test", "rest")) println
+        Byeloblog render(page("test", "rest")) println
