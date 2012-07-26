@@ -93,7 +93,7 @@ Sections
 - Hole
 
 
-*
+\*
 --
 - Splat, bezirt transform, blask
 
@@ -144,23 +144,35 @@ Sections
     - cell :"sw" for any quote type :angle - take string, create array by splitting on spaces and converting to symbols, no escapes or interpolation
     - cell :"#" for quote type :curly - set constructor
 
-- 
-, is a comma splice
-… current line continues on next line.
+_
+---
+- Lots of stuff. Anonymous functions, empty matches... Also, other things. The evil reflection of \*.
+
+,
+---
+- A comma splice. No, really.
+- The separator between arguments in an argument list, the items in a set, list or dictionary, and so forth.
+
+…
+---
+- Ignore an immediately following newline. In effect, the current line continues on the next line.
+
+
+---
+
 § + a name closes that section
 ∘ for function application
 Datalang, query lang, qq lang ...
-\_ as lots of stuff
 
 
 Example:
 --------
 
-        let page = #'(html
-                       (head title \`\_)
-                       (body
-                         div "a b c d e"
-                         div "c d e f g"
-                         (div \`\_)))
-
-        Byeloblog render(page("test", "rest")) println
+        let(
+          page, #'(html
+                    (head title `_)
+                    (body
+                      div "a b c d e"
+                      div "c d e f g"
+                      (div `_))),
+          Byeloblog render(page("test", "rest")) println)
