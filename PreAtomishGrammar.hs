@@ -61,10 +61,10 @@ quotedstring :: Literal
   = '\"' ( quotedlit / quotedescape / interpolate )* '\"' { LitText (QuotedString $1) }
 
 squarelit :: Chunk
-  = [^\\\]]+ { (Lit $1) }
+  = [^\\\]{]+ { (Lit $1) }
 
 quotedlit :: Chunk
-  = [^\\"]+  { (Lit $1) }  --"
+  = [^\\"{]+  { (Lit $1) }  --"
 
 squareescape :: Chunk
   = '\\' [nr\]{] { (Escape ['\\', $1]) }
