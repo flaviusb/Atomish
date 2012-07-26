@@ -1,7 +1,7 @@
 {-# Language TemplateHaskell, QuasiQuotes, FlexibleContexts, DeriveDataTypeable #-}
 
 module PreAtomishGrammar
-(preatomish, MessageChain(..), Expression(..), BracketType(..), Literal(..)) where
+(preatomish, MessageChain(..), Expression(..), BracketType(..), Literal(..), LitS(..), Chunk(..)) where
 import Data.Data
 import Data.Typeable
 import qualified Data.Map as Map
