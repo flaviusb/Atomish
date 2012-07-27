@@ -168,11 +168,13 @@ Datalang, query lang, qq lang ...
 Example:
 --------
 
-        let(
-          page, #'(html
-                    (head title `_)
-                    (body
-                      div "a b c d e"
-                      div "c d e f g"
-                      (div `_))),
-          Byeloblog render(page("test", "rest")) println)
+        let(page, #'(html
+                      (head title `_)
+                      (body
+                        (section
+                          h1 `_
+                          span(class: `_) `_
+                          div " I'm all in "
+                          (div `_)))),
+            stuff, qw<Hello.atomish Hello fragment World!. bits.>,
+            Byeloblog render(page(*stuff)) println)
