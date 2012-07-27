@@ -111,8 +111,8 @@ Sections
 :
 ---
 - Forms a list on the right and applies it to the left - make explicit the elements of a set (done via a list apply monad) - monads in do-notation - Syntactical-descriptive
-- Describes the left with the right ie types and type like things - Appositive
-- Forming (or recieving an implicitly formed) a closure/continuation/(ruby style)-block - Segmental
+- Describes the left with the right ie key-value relationships (the value describes the key), for example in Dicts or Arglists - Appositive
+- Forming (or recieving implicitly formed) a closure/continuation/(ruby style)-block - Segmental
 
 
 ;
