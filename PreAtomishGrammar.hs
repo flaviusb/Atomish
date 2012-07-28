@@ -28,7 +28,7 @@ messagechain ::: MessageChain
   = expression+ { MessageChain $1 }
 
 expression ::: Expression
-  = ( message / brackets / literal / terminator )
+  = ( literal / message / brackets / terminator )
 
 brackets :: Expression
   = ( ('(' commated ')' { Brackets RoundBracket $1 }) / ('[' commated ']' { Brackets SquareBracket $1 }) / ('{' commated '}' { Brackets CurlyBracket $1 }) )
@@ -40,13 +40,13 @@ name :: String
   = [a-zA-Z] [a-zA-Z_:0-9?]* { $1:$2 }
 
 operator :: String
-  = [~!@$%^&*_+-='`/?×÷+-]+
+  = [~!@$%^&*_='`/?×÷+-]+
 
 literal :: Expression
   = ( decimal / number / text ) { ELiteral $1 }
 
 decimal :: Literal
-  = [+-]? [0-9]+ ( '.' [0-9]+ )? { LitDecimal (read ((maybeToList $1) ++ $2 ++ (fromMaybe [] $3))) }
+  = [+-]? [0-9]+ ( '.' [0-9]+ )? { LitDecimal (read ((maybeToList $1) ++ $2 ++ "." ++ (fromMaybe "0" $3))) }
 
 number :: Literal
   = [+-]? [0-9]+ { LitInteger (read ((maybeToList $1) ++ $2)) }
