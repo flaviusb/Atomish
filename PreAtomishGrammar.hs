@@ -40,7 +40,7 @@ name :: String
   = [a-zA-Z] [a-zA-Z_:0-9?]* { $1:$2 }
 
 operator :: String
-  = [~!@$%^&*_+-='`/?×÷+-]*
+  = [~!@$%^&*_+-='`/?×÷+-]+
 
 literal :: Expression
   = ( decimal / number / text ) { ELiteral $1 }
@@ -79,6 +79,6 @@ terminator :: Expression
   = ('.' / '\n' / '\r') { Terminator }
 
 commated ::: [MessageChain]
-  =  messagechain ',' messagechain* { $1:$2 }
+  =  messagechain (',' messagechain)* { $1:$2 }
 
 |]
