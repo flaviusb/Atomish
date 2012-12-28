@@ -349,4 +349,4 @@ digit  = one_of(char_range("0", "9"))
 digits = many_chars(digit, min_count = 1)
 space  = one_of(" \v\f\t\r\n")
 spaces = skip_many(space)
-
+ret    = choice([match("\r\n"), match("\n")])
