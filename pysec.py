@@ -197,10 +197,7 @@ def option(state, default_value, parser):
     try:
         return parser(state)
     except ParseFailed, failure:
-        if failure.state == state:
-            return (default_value, state)
-        else:
-            raise
+        return (default_value, state)
         
 @parser
 def choice(state, parsers):
@@ -208,8 +205,9 @@ def choice(state, parsers):
         try:
             return parser(state)
         except ParseFailed, failure:
-            if failure.state != state:
-                raise failure
+            pass
+            #if failure.state != state:
+            #    raise failure
     raise ParseFailed("no choices were found", state)
 
 @parser
