@@ -59,7 +59,7 @@ Sections
 - Generic reader macro start character. Not meaningful by itself.
 
 
-؟, #;
+؟, ##
 --
 - Comment, irony
 
@@ -67,6 +67,14 @@ Sections
 --
 - Bangline
 
+!
+--
+- Call a function with no arguments
+
+‼, !!
+--
+- Fixpoint call; keep calling until the result is not a nullary function
+- Fixpoint call with args - keep calling until the result is not a function that takes those args
 
 '
 --
@@ -143,6 +151,8 @@ Sections
     - cell :"qw" for any quote type :angle - take string, create array by splitting on spaces, no escapes or interpolation
     - cell :"sw" for any quote type :angle - take string, create array by splitting on spaces and converting to symbols, no escapes or interpolation
     - cell :"#" for quote type :curly - set constructor
+    - cell :"mf" for quote type :guillemet - math style function - single letter variables, juxtaposition = multiplication. Results in a function with named args for each of the variables used.
+    - cell :"me" for quote type :guillemet - math style expression - single letter variables, juxtaposition = multiplication. Results in an expression.
 
 _
 ---
