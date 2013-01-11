@@ -57,3 +57,11 @@ def seq(*parsers):
 def many1(parser):
   return seq(parser, star(parser))
 
+def wrap(parser, func):
+  def wrapped(data, pos, struct):
+    (stasheddata, stashedpos, stashedstruct) = (data, pos, struct)
+    (success, newdata, newpos, newstruct) = parser(data, pos, struct)
+    if(success):
+      (newdata, newpos, newstruct) = func(newdata, stashedpos, newpos, stashedstruct, newstruct)
+    return (success, newdata, newpos, newstruct)
+  return wrapped
