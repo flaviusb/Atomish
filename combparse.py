@@ -1,5 +1,7 @@
 # The simplest, dumbest parser combinator library that actually kinda works
 
+import re
+
 def alt(*parsers):
   def inneralt(data, pos, struct):
     for parser in parsers:
@@ -11,15 +13,23 @@ def alt(*parsers):
 
 def lit(text):
   def innerlit(data, pos, struct):
-    if (data[pos:(len(text))] == text):
+    if (data[pos:(pos+len(text))] == text):
       return (True, data, pos + len(text), struct)
     return (False, data, pos, struct)
   return innerlit
 
-def nop():
-  def innernop(data, pos, struct):
-    return (True, data, pos, struct)
-  return innernop
+def relit(regex):
+  def innerrelit(data, pos, struct):
+    pattern = re.compile(regex)
+    match = pattern.match(data, pos)
+    if (match):
+      return (True, data, match.end(), struct)
+    return (False, data, pos, struct)
+  return innerrelit
+
+def nop(data, pos, struct):
+  return (True, data, pos, struct)
+
 
 def opt(parser):
   return alt(parser, nop)
@@ -39,7 +49,7 @@ def seq(*parsers):
     (cont, newdata, newpos, newstruct) = (True, data, pos, struct)
     for parser in parsers:
       (cont, newdata, newpos, newstruct) = parser(newdata, newpos, newstruct)
-      if (!cont):
+      if (not cont):
         return (False, data, pos, struct)
     return (cont, newdata, newpos, newstruct)
   return innerseq
