@@ -11,11 +11,11 @@ def atomish_comment(subtype):
     return { 'type': "comment", 'value': { 'subtype': subtype, 'text': text } }
   return inner_comment
 
-def atomish_decimal(num):
-  return { 'type': 'decimal', 'value': float(num) }
+def atomish_decimal(data, start, end, prestruct, parsedstruct):
+  return (data, end, { 'type': 'decimal', 'value': float(data[start:end]) })
 
-def atomish_whole_number(num):
-  return { 'type': 'integer', 'value': int(num) }
+def atomish_whole_number(data, start, end, prestruct, parsedstruct):
+  return (data, end, { 'type': 'integer', 'value': int(data[start:end]) })
 
 def atomish_operator(op):
   return { 'type': 'operator', value: op }
@@ -33,8 +33,8 @@ def limb(data, pos, struct):
 digit             = relit(r"[0-9]")
 digits            = many1(digit)
 
-decimal_number    = seq(opt(alt(lit("+"), lit("-"))), digits, lit("."), digits)
-whole_number      = seq(opt(alt(lit("+"), lit("-"))), digits)
+decimal_number    = wrap(seq(opt(alt(lit("+"), lit("-"))), digits, lit("."), digits), atomish_decimal)
+whole_number      = wrap(seq(opt(alt(lit("+"), lit("-"))), digits), atomish_whole_number)
 number            = alt(decimal_number, whole_number)
 
 # Still uses pysec
