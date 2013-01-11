@@ -21,4 +21,29 @@ def nop():
     return (True, data, pos, struct)
   return innernop
 
+def opt(parser):
+  return alt(parser, nop)
+
+def star(parser):
+  def innerstar(data, pos, struct):
+    (loop, newdata, newpos, newstruct) = (True, data, pos, struct)
+    while(loop):
+      (loop, tempdata, temppos, tempstruct) = parser(newdata, newpos, newstruct)
+      if (loop):
+        (newdata, newpos, newstruct) = (tempdata, temppos, tempstruct)
+    return (True, newdata, newpos, newstruct)
+  return innerstar
+
+def seq(*parsers):
+  def innerseq(data, pos, struct):
+    (cont, newdata, newpos, newstruct) = (True, data, pos, struct)
+    for parser in parsers:
+      (cont, newdata, newpos, newstruct) = parser(newdata, newpos, newstruct)
+      if (!cont):
+        return (False, data, pos, struct)
+    return (cont, newdata, newpos, newstruct)
+  return innerseq
+
+def many1(parser):
+  return seq(parser, star(parser))
 
