@@ -20,6 +20,11 @@ def atomish_whole_number(data, start, end, prestruct, parsedstruct):
 def atomish_operator(op):
   return { 'type': 'operator', value: op }
 
+def atomish_nl(kind):
+  def atomish_nl_inner(data, start, end, prestruct, parsedstruct):
+    return (data, end, { 'type': 'nl', 'value': kind })
+  return atomish_nl_inner
+
 alpha = char_range("a", "z") + char_range("A", "Z")
 ident = alpha + "_:?!→←⇒⇐$%" + char_range("0", "9")
 
@@ -36,6 +41,10 @@ digits            = many1(digit)
 decimal_number    = wrap(seq(opt(alt(lit("+"), lit("-"))), digits, lit("."), digits), atomish_decimal)
 whole_number      = wrap(seq(opt(alt(lit("+"), lit("-"))), digits), atomish_whole_number)
 number            = alt(decimal_number, whole_number)
+
+dot               = wrap(lit("."), atomish_nl("dot"))
+ret               = wrap(lit("\r\n"), atomish_nl("ret"))
+nl                = alt(dot, ret)
 
 # Still uses pysec
 
