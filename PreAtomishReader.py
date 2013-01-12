@@ -50,9 +50,6 @@ nl                = alt(dot, ret)
 
 expression_choices = []
 expression        = choice(expression_choices)
-decimal_number    = join_chars(group([option("", choice([match("-"), match("+")])), digits, match("."), digits])) >> Parser.lift(atomish_decimal)
-whole_number      = join_chars(group([option("", choice([match("-"), match("+")])), digits])) >> Parser.lift(atomish_whole_number)
-number            = choice([decimal_number, whole_number])
 irony             = between(match('؟') , many_chars(none_of('\r\n')), ret) >> Parser.lift(atomish_comment('ironic'))
 comment           = between(match('##') , many_chars(none_of('\r\n')), ret) >> Parser.lift(atomish_comment('earnest'))
 aside             = between(match('#-') , many_chars(none_of('-#')), match('-#')) >> Parser.lift(atomish_comment('aside'))
