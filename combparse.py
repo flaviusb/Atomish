@@ -54,6 +54,21 @@ def seq(*parsers):
     return (cont, newdata, newpos, newstruct)
   return innerseq
 
+# A seq that accumulates values from the intermediate parsers
+def aseq(*parsers):
+  def innerseq(data, pos, struct):
+    (cont, newdata, newpos, newstruct) = (True, data, pos, [])
+    acc = struct
+    for parser in parsers:
+      (cont, newdata, newpos, newstruct) = parser(newdata, newpos, newstruct)
+      if ((newstruct != []) && (newstruct != None)):
+        acc.push(newstruct)
+        newstruct = []
+      if (not cont):
+        return (False, data, pos, struct)
+    return (cont, newdata, newpos, acc)
+  return innerseq
+
 def many1(parser):
   return seq(parser, star(parser))
 
