@@ -4,6 +4,9 @@ Atomish
 A small (in size, scope, and memory footprint), reasonably fast language for writing self contained executables.
 
 
+Ur-Principle: separating and reifying readers, evallers, printers, runloops, universes, and mirrors.
+
+
 Goals
 -----
 
@@ -27,6 +30,7 @@ This is all supposed to be a replacement for the places I use Ioke, but need som
 
 Inspired by Cola/Pepsi/Idst/Maru, Ioke, Common Lisp and Haskell.
 Other influences: Perl 5&6 (Guts on the outside, TMTWTDI, Moose, 6Model), Io (Mirrors), OCaml (module system), Potion.
+Minor influences: Atomy, Atomo, Slate, Erlang, Snobol, MetaLua.
 
 
 Is it any good?
