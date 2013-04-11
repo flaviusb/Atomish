@@ -1,7 +1,12 @@
 package net.flaviusb.atomish
 
+import scala.collection.mutable.{Map => MMap}
+
 // AtomishThing is the supertype of all the container types for all 'things' that are reified in Atomish
-trait AtomishThing
+trait AtomishThing {
+  var cells: MMap[String, AtomishThing] = MMap(
+  )
+}
 
 case class AtomishInt(value: Int) extends AtomishThing with AtomishCode
 
