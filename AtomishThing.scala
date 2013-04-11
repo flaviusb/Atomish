@@ -9,10 +9,10 @@ case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode
 
 case class AtomishMessage(name: String) extends AtomishThing with AtomishCode
 
-case class AtomishCommated(args: Array[AtomishCode])
+case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode
 
-case class AtomishCall(name: String, args: Array[AtomishCode])
+case class AtomishCall(name: String, args: Array[AtomishCode]) extends AtomishThing with AtomishCode
 
-case class MessageChain(messages: Array[AtomishMessage])
+case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing with AtomishCode
 
 trait AtomishCode
