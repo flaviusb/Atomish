@@ -10,6 +10,7 @@ class PreUniverse {
         base match {
           case thing: AtomishThing =>  {
             thing.cells.get(first) match {
+              case Some(AtomishUnset) => None
               case Some(cell) => {
                 if(rest.isEmpty) {
                   Some(cell)
@@ -17,7 +18,18 @@ class PreUniverse {
                   recapply(cell, rest)
                 }
               }
-              case None => None
+              case None => {
+                AtomishThing.bootstrap_cells.get(first) match {
+                  case Some(cell) => {
+                    if(rest.isEmpty) {
+                      Some(cell(base))
+                    } else {
+                      recapply(cell(base), rest)
+                    }
+                  }
+                  case None => None
+                }
+              }
             }
           }
           case _                   => None

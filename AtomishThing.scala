@@ -4,12 +4,36 @@ import scala.collection.mutable.{Map => MMap}
 
 // AtomishThing is the supertype of all the container types for all 'things' that are reified in Atomish
 trait AtomishThing {
-  var cells: MMap[String, AtomishThing] = MMap(
-    "hasCell" -> AlienProxy[AtomishString, AtomishBoolean](x => AtomishBoolean(cells.isDefinedAt(x.value))),
-    "cell" -> AlienProxy[AtomishString, AtomishThing](x => cells(x.value)),
-    "activatable" -> AtomishBoolean(false)
+  var cells: MMap[String, AtomishThing] = MMap()
+}
+
+object AtomishThing {
+  var bootstrap_cells: MMap[String, AtomishThing => AtomishThing] = MMap(
+    "hasCell" -> { thing => AlienProxy[AtomishString, AtomishBoolean](x => {
+      // A thing can have a cell value of AtomishUnset, or it can have a cell value that is not AtomishUnset,  or if it does not have a
+      // value the bootstrap can have a value, or it has no value, considered in that order.
+      if(thing.cells.isDefinedAt(x.value)) {
+        if(thing.cells(x.value) == AtomishUnset) {
+          AtomishBoolean(false)
+        } else {
+        AtomishBoolean(true)
+        }
+      } else {
+        AtomishBoolean(AtomishThing.bootstrap_cells.isDefinedAt(x.value))
+      }
+    }) },
+    "cell" -> { thing => AlienProxy[AtomishString, AtomishThing](x => {
+      if(thing.cells.isDefinedAt(x.value)) {
+        thing.cells(x.value)
+      } else {
+        AtomishThing.bootstrap_cells(x.value)(thing)
+      }
+    }) },
+    "activatable" -> { thing => AtomishBoolean(false) }
   )
 }
+
+object AtomishUnset extends AtomishThing
 
 case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode {
 }
