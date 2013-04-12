@@ -5,6 +5,13 @@ import scala.util.parsing.combinator._
 import scala.language.postfixOps
 
 class PreReader {
+  def read(str: AtomishString): AtomishCode = {
+    AtomishParser.parseAll(AtomishParser.code, str.value) match {
+      case AtomishParser.Success(atomval, _) => atomval
+      case _                   => null // Should trigger condition system
+    }
+  }
+  val alien_read = AlienProxy(read)
 }
 
 object AtomishParser extends RegexParsers {

@@ -44,4 +44,6 @@ case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing wi
 
 trait AtomishCode
 
-case class AlienProxy[A, B](call: A => B) extends AtomishThing
+case class AlienProxy[A, B](call: A => B) extends AtomishThing {
+  cells("activatable") = AtomishBoolean(true)
+}
