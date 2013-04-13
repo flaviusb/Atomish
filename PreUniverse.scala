@@ -3,7 +3,9 @@ package net.flaviusb.atomish
 import scala.collection.mutable.{Map => MMap}
 
 class PreUniverse {
-  var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing]()
+  var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing](
+    "version" -> AtomishDecimal(0.1)
+  )
   def apply(key: AtomishPlace): Option[AtomishThing] = {
     def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
       case Seq(AtomishMessage(first), rest @ _*) => {
@@ -37,6 +39,9 @@ class PreUniverse {
       }
     }
     key.form match {
+      case AtomishMessage(name) => {
+        return roots.get(name)
+      }
       case MessageChain(Array(AtomishMessage(first), messages @ _*)) => {
         var root = roots.get(first)
         root match {
