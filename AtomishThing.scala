@@ -1,32 +1,51 @@
 package net.flaviusb.atomish
 
+import scala.language.experimental.macros
 import scala.collection.mutable.{Map => MMap}
 
 // AtomishThing is the supertype of all the container types for all 'things' that are reified in Atomish
 trait AtomishThing {
   var cells: MMap[String, AtomishThing] = MMap()
+  // apply should respect the MOP, but does not deal with activatability
+  def apply(key: AtomishString): AtomishThing = {
+    if(cells.isDefinedAt("cell")) {
+      cells("cell") match {
+        case (proxy: AlienProxy) => proxy.activate(AtomishArgs(List(Left(key))))
+      }
+    } else {
+      AtomishThing.bootstrap_cells(key.value)(this)
+    }
+  }
+  def update(key: AtomishString, value: AtomishThing) {
+    cells(key.value) = value
+  }
 }
 
 object AtomishThing {
   var bootstrap_cells: MMap[String, AtomishThing => AtomishThing] = MMap(
-    "hasCell" -> { thing => AlienProxy[AtomishString, AtomishBoolean](x => {
-      // A thing can have a cell value of AtomishUnset, or it can have a cell value that is not AtomishUnset,  or if it does not have a
-      // value the bootstrap can have a value, or it has no value, considered in that order.
-      if(thing.cells.isDefinedAt(x.value)) {
-        if(thing.cells(x.value) == AtomishUnset) {
-          AtomishBoolean(false)
+    "hasCell" -> { thing => AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => {
+        // A thing can have a cell value of AtomishUnset, or it can have a cell value that is not AtomishUnset,  or if it does not have a
+        // value the bootstrap can have a value, or it has no value, considered in that order.
+        if(thing.cells.isDefinedAt(x)) {
+          if(thing.cells(x) == AtomishUnset) {
+            AtomishBoolean(false)
+          } else {
+          AtomishBoolean(true)
+          }
         } else {
-        AtomishBoolean(true)
+          AtomishBoolean(AtomishThing.bootstrap_cells.isDefinedAt(x))
         }
-      } else {
-        AtomishBoolean(AtomishThing.bootstrap_cells.isDefinedAt(x.value))
       }
+      case _ => AtomishBoolean(false)
     }) },
-    "cell" -> { thing => AlienProxy[AtomishString, AtomishThing](x => {
-      if(thing.cells.isDefinedAt(x.value)) {
-        thing.cells(x.value)
-      } else {
-        AtomishThing.bootstrap_cells(x.value)(thing)
+    "cell" -> { thing => AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => {
+        if(thing.cells.isDefinedAt(x)) {
+          thing.cells(x)
+        } else {
+          AtomishThing.bootstrap_cells(x)(thing)
+        }
       }
     }) },
     "activatable" -> { thing => AtomishBoolean(false) }
@@ -40,20 +59,46 @@ case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode 
 
 case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
-    "+" -> AlienProxy[AtomishInt, AtomishInt](x => AtomishInt(x.value + value)),
-    "-" -> AlienProxy[AtomishInt, AtomishInt](x => AtomishInt(x.value - value)),
-    "×" -> AlienProxy[AtomishInt, AtomishInt](x => AtomishInt(x.value * value)),
-    "÷" -> AlienProxy[AtomishInt, AtomishInt](x => AtomishInt(x.value / value))
+    "+" -> AlienProxy(inttoint(_ + value)),
+    "-" -> AlienProxy(inttoint(_ - value)),
+    "×" -> AlienProxy(inttoint(_ * value)),
+    "÷" -> AlienProxy(inttoint(_ / value))
   )
 }
 
 case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
-    "+" -> AlienProxy[AtomishDecimal, AtomishDecimal](x => AtomishDecimal(x.value + value)),
-    "-" -> AlienProxy[AtomishDecimal, AtomishDecimal](x => AtomishDecimal(x.value - value)),
-    "×" -> AlienProxy[AtomishDecimal, AtomishDecimal](x => AtomishDecimal(x.value * value)),
-    "÷" -> AlienProxy[AtomishDecimal, AtomishDecimal](x => AtomishDecimal(x.value / value))
+    "+" -> AlienProxy(dectodec(_ + value)),
+    "-" -> AlienProxy(dectodec(_ - value)),
+    "×" -> AlienProxy(dectodec(_ * value)),
+    "÷" -> AlienProxy(dectodec(_ / value))
  )
+}
+
+case class Args(args: List[Arg])
+trait Arg
+case class Positional(name: String, argtype: String)
+case class Keyword(name: String, argtype: String)
+case class Splat(name: String)
+case class KWSplat(name: String)
+case class Return(rettype: String)
+
+case class dectodec(call: Double => Double) extends (AtomishArgs => AtomishDecimal) {
+  override def apply(args: AtomishArgs): AtomishDecimal = {
+    args.args match {
+      case List(Left(AtomishDecimal(x))) => AtomishDecimal(call(x))
+      case _                             => null // Should error
+    }
+  }
+}
+
+case class inttoint(call: Int => Int) extends (AtomishArgs => AtomishInt) {
+  override def apply(args: AtomishArgs): AtomishInt = {
+    args.args match {
+      case List(Left(AtomishInt(x))) => AtomishInt(call(x))
+      case _                             => null // Should error
+    }
+  }
 }
 
 case class AtomishString(value: String) extends AtomishThing with AtomishCode
@@ -66,8 +111,22 @@ case class AtomishCall(name: String, args: Array[AtomishCode]) extends AtomishTh
 
 case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing with AtomishCode
 
-trait AtomishCode
+trait AtomishCode extends AtomishThing
 
-case class AlienProxy[A, B](call: A => B) extends AtomishThing {
+  case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (AtomishArgs => AtomishCode) {
+    override def apply(args: AtomishArgs): AtomishCode = {
+      args.args match {
+        case List(Left(x: AtomishString)) => call(x)
+        case _                            => null // Should error
+      }
+    }
+  }
+
+
+case class AtomishArgs(args: List[Either[AtomishThing, (String, AtomishThing)]])
+
+case class AlienProxy(call: AtomishArgs => AtomishThing) extends AtomishThing {
   cells("activatable") = AtomishBoolean(true)
+  // Deal with 'activate' in evaller; this is graceless, but necessary for bootstrapping
+  def activate(args: AtomishArgs): AtomishThing = call(args)
 }

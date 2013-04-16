@@ -11,7 +11,8 @@ class PreReader {
       case _                   => null // Should trigger condition system
     }
   }
-  val alien_read = AlienProxy(read)
+
+  val alien_read = AlienProxy(shallowwrapstrtocode(read))
 }
 
 object AtomishParser extends RegexParsers {
