@@ -13,7 +13,7 @@ trait AtomishThing {
         case (proxy: AlienProxy) => proxy.activate(AtomishArgs(List(Left(key))))
       }
     } else {
-      AtomishThing.bootstrap_cells(key.value)(this)
+      AtomishThing.bootstrap_cells("cell")(this).asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(key))))
     }
   }
   def update(key: AtomishString, value: AtomishThing) {

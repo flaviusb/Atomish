@@ -4,7 +4,17 @@ import scala.collection.mutable.{Map => MMap}
 
 class PreUniverse {
   var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing](
-    "version" -> AtomishDecimal(0.1)
+    "version" -> AtomishDecimal(0.1),
+    "say"     -> AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => {
+        println(x)
+        AtomishUnset
+      }
+      case x                            => {
+        println(x.toString())
+        AtomishUnset
+      }
+    })
   )
   def apply(key: AtomishPlace): Option[AtomishThing] = {
     def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
