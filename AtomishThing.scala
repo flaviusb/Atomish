@@ -113,14 +113,14 @@ case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing wi
 
 trait AtomishCode extends AtomishThing
 
-  case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (AtomishArgs => AtomishCode) {
-    override def apply(args: AtomishArgs): AtomishCode = {
-      args.args match {
-        case List(Left(x: AtomishString)) => call(x)
-        case _                            => null // Should error
-      }
+case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (AtomishArgs => AtomishCode) {
+  override def apply(args: AtomishArgs): AtomishCode = {
+    args.args match {
+      case List(Left(x: AtomishString)) => call(x)
+      case _                            => null // Should error
     }
   }
+}
 
 
 case class AtomishArgs(args: List[Either[AtomishThing, (String, AtomishThing)]])
