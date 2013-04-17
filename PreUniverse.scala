@@ -52,6 +52,9 @@ class PreUniverse {
       case AtomishMessage(name) => {
         return roots.get(name)
       }
+      case AtomishCall(name, _) => {
+        return roots.get(name)
+      }
       case MessageChain(Array(AtomishMessage(first), messages @ _*)) => {
         var root = roots.get(first)
         root match {

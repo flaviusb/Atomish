@@ -75,14 +75,6 @@ case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
  )
 }
 
-case class Args(args: List[Arg])
-trait Arg
-case class Positional(name: String, argtype: String)
-case class Keyword(name: String, argtype: String)
-case class Splat(name: String)
-case class KWSplat(name: String)
-case class Return(rettype: String)
-
 case class dectodec(call: Double => Double) extends (AtomishArgs => AtomishDecimal) {
   override def apply(args: AtomishArgs): AtomishDecimal = {
     args.args match {
