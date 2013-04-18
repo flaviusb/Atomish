@@ -105,6 +105,11 @@ case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing wi
 
 trait AtomishCode extends AtomishThing
 
+object AtomishNL extends AtomishThing with AtomishCode
+
+// As in, the reader reads a string and outputs a form, the evaller evals a form...
+case class AtomishForm(things: List[AtomishCode]) extends AtomishThing with AtomishCode
+
 case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (AtomishArgs => AtomishCode) {
   override def apply(args: AtomishArgs): AtomishCode = {
     args.args match {
