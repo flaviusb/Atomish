@@ -3,7 +3,7 @@ package net.flaviusb.atomish
 object PreEvaller {
   def relgrounder(universe: PreUniverse, ground: Option[AtomishThing])(key: AtomishPlace): Option[AtomishThing] = ground match {
     case Some(thing) => {
-      println(thing)
+      //println(thing)
       Some(thing(key.form match {
         case x: AtomishString  => x
         case AtomishMessage(x) => AtomishString(x)
@@ -14,8 +14,8 @@ object PreEvaller {
   }
   def eval(universe: PreUniverse)(ast: AtomishCode, ground: Option[AtomishThing] = None): AtomishThing = {
     val relground = relgrounder(universe, ground) _
-    println(ast)
-    println(ground)
+    //println(ast)
+    //println(ground)
     ast match {
       // Do message lookup first, left to right, minding activatability
       case (msg: AtomishMessage)   => {
