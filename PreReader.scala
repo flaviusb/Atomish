@@ -22,7 +22,7 @@ object AtomishParser extends RegexParsers {
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
   def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
-  def string   = """"([^"\\]|\\")*"""".r ^^ { (str: String) => AtomishString(str) }
+  def string   = ("\"" ~ """([^"\\]|\\")*""".r ~ "\"") ^^ { case "\"" ~ str ~ "\"" => AtomishString(str) }
   def identifier: Parser[AtomishMessage] = ("[a-zA-Z][a-zA-Z0-9_:$!?]*".r | "[~!@$%^&*_=\'`/?×÷+-]+".r) ^^ { AtomishMessage(_) }
   def code_tiny_bit: Parser[AtomishCode] = (commated | atomish_call | string | rational | integer | identifier | nll) // This will eventually be a big union of all types that can constitute standalone code
   //def code_tiny_bit: Parser[AtomishCode] = (nll) // This will eventually be a big union of all types that can constitute standalone code
