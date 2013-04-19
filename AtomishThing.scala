@@ -88,12 +88,34 @@ case class inttoint(call: Int => Int) extends (AtomishArgs => AtomishInt) {
   override def apply(args: AtomishArgs): AtomishInt = {
     args.args match {
       case List(Left(AtomishInt(x))) => AtomishInt(call(x))
-      case _                             => null // Should error
+      case _                         => null // Should error
     }
   }
 }
 
-case class AtomishString(value: String) extends AtomishThing with AtomishCode
+case class nonetoint(call: () => Int) extends (AtomishArgs => AtomishInt) {
+  override def apply(args: AtomishArgs): AtomishInt = {
+    args.args match {
+      case List() => AtomishInt(call())
+      case _      => null // Should error
+    }
+  }
+}
+case class strtostr(call: String => String) extends (AtomishArgs => AtomishString) {
+  override def apply(args: AtomishArgs): AtomishString = {
+    args.args match {
+      case List(Left(AtomishString(x))) => AtomishString(call(x))
+      case _                            => null // Should error
+    }
+  }
+}
+
+case class AtomishString(value: String) extends AtomishThing with AtomishCode {
+  cells ++= MMap[String, AtomishThing](
+    "length" -> AlienProxy(nonetoint(value.length)),
+    "+"      -> AlienProxy(strtostr(value + _))
+  )
+}
 
 case class AtomishMessage(name: String) extends AtomishThing with AtomishCode
 
