@@ -59,19 +59,19 @@ case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode 
 
 case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
-    "+" -> AlienProxy(inttoint(_ + value)),
-    "-" -> AlienProxy(inttoint(_ - value)),
-    "×" -> AlienProxy(inttoint(_ * value)),
-    "÷" -> AlienProxy(inttoint(_ / value))
+    "+" -> AlienProxy(inttoint(value + _)),
+    "-" -> AlienProxy(inttoint(value -_)),
+    "×" -> AlienProxy(inttoint(value * _)),
+    "÷" -> AlienProxy(inttoint(value / _))
   )
 }
 
 case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
-    "+" -> AlienProxy(dectodec(_ + value)),
-    "-" -> AlienProxy(dectodec(_ - value)),
-    "×" -> AlienProxy(dectodec(_ * value)),
-    "÷" -> AlienProxy(dectodec(_ / value))
+    "+" -> AlienProxy(dectodec(value + _)),
+    "-" -> AlienProxy(dectodec(value - _)),
+    "×" -> AlienProxy(dectodec(value * _)),
+    "÷" -> AlienProxy(dectodec(value / _))
  )
 }
 
