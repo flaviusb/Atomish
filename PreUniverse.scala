@@ -14,6 +14,12 @@ class PreUniverse {
         println(x.toString())
         AtomishUnset
       }
+    }),
+    "setCell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name)), Left(value: AtomishThing)) => {
+        roots(name) = value
+        value
+      }
     })
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {

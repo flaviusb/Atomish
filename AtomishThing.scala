@@ -23,7 +23,7 @@ trait AtomishThing {
 
 object AtomishThing {
   var bootstrap_cells: MMap[String, AtomishThing => AtomishThing] = MMap(
-    "hasCell" -> { thing => AlienProxy(_.args match {
+    "hasCell"     -> { thing => AlienProxy(_.args match {
       case List(Left(AtomishString(x))) => {
         // A thing can have a cell value of AtomishUnset, or it can have a cell value that is not AtomishUnset,  or if it does not have a
         // value the bootstrap can have a value, or it has no value, considered in that order.
@@ -39,13 +39,19 @@ object AtomishThing {
       }
       case _ => AtomishBoolean(false)
     }) },
-    "cell" -> { thing => AlienProxy(_.args match {
+    "cell"        -> { thing => AlienProxy(_.args match {
       case List(Left(AtomishString(x))) => {
         if(thing.cells.isDefinedAt(x)) {
           thing.cells(x)
         } else {
           AtomishThing.bootstrap_cells(x)(thing)
         }
+      }
+    }) },
+    "setCell"     -> { thing => AlienProxy(_.args match {
+      case List(Left(name: AtomishString), Left(value: AtomishThing)) => {
+        thing(name) = value
+        value
       }
     }) },
     "activatable" -> { thing => AtomishBoolean(false) }
