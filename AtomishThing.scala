@@ -109,11 +109,29 @@ case class strtostr(call: String => String) extends (AtomishArgs => AtomishStrin
     }
   }
 }
+case class inttostr(call: Int => String) extends (AtomishArgs => AtomishString) {
+  override def apply(args: AtomishArgs): AtomishString = {
+    args.args match {
+      case List(Left(AtomishInt(x))) => AtomishString(call(x))
+      case _                         => null // Should error
+    }
+  }
+}
+case class intinttostr(call: (Int, Int) => String) extends (AtomishArgs => AtomishString) {
+  override def apply(args: AtomishArgs): AtomishString = {
+    args.args match {
+      case List(Left(AtomishInt(x)), Left(AtomishInt(y))) => AtomishString(call(x, y))
+      case _                                              => null // Should error
+    }
+  }
+}
 
 case class AtomishString(value: String) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
-    "length" -> AlienProxy(nonetoint(value.length)),
-    "+"      -> AlienProxy(strtostr(value + _))
+    "length"    -> AlienProxy(nonetoint(value.length)),
+    "+"         -> AlienProxy(strtostr(value + _)),
+    "charAt"    -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
+    "substring" -> AlienProxy(intinttostr((x, y) => value.substring(x, y)))
   )
 }
 
