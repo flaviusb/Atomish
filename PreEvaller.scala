@@ -113,7 +113,7 @@ object PreEvaller {
             ground match {
               case Some(existing_ground) => {
                 existing_ground match {
-                  case prx: AlienProxy => prx.activate(AtomishArgs(x.map(q => Left(q)).toList))
+                  case prx: AlienProxy => prx.activate(AtomishArgs(x.map(q => Left(eval(universe)(q))).toList))
                 }
               }
               case None    => {
