@@ -106,6 +106,26 @@ object PreEvaller {
           case AtomishInt(x)           => AtomishInt(x)
           case AtomishDecimal(x)       => AtomishDecimal(x)
           case AtomishString(x)        => AtomishString(x)
+          case AtomishCommated(x: Array[AtomishCode]) => {
+            // Send as activation to ground if ground exists
+            // Otherwise, if the commated only has one arg, 
+            // we treat as possibly singal value term in an expression
+            ground match {
+              case Some(existing_ground) => {
+                existing_ground match {
+                  case prx: AlienProxy => prx.activate(AtomishArgs(x.map(q => Left(q)).toList))
+                }
+              }
+              case None    => {
+                // Attempt to treat as a single value
+                if(x.length == 1) {
+                  eval(universe)(x(0))
+                } else {
+                  null // should error
+                }
+              }
+            }
+          }
           case AtomishNL               => {
             // This handles continuing subforms
             // As recursive evalling should always be the last thing we do, and side effects are packed away
