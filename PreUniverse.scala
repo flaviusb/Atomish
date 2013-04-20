@@ -30,7 +30,11 @@ class PreUniverse {
       case List(Left(AtomishString(name))) => {
         AtomishBoolean((roots.isDefinedAt(name)) && (roots(name) != AtomishUnset))
       }
-    })
+    }),
+    "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
+      case Left(x) => Array[AtomishThing](x)
+      case _       => Array[AtomishThing]()
+    }).toArray))
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
     case Seq(AtomishMessage(first), rest @ _*) => {

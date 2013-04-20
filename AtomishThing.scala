@@ -144,11 +144,24 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode {
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(value.length)),
     "+"         -> AlienProxy(strtostr(value + _)),
-    "charAt"    -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
+    "at"        -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
     "substring" -> AlienProxy(intinttostr((x, y) => value.substring(x, y))),
     "asString" -> AlienProxy(_.args match {
       case List() => AtomishString(value.toString())
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
+    })
+  )
+}
+
+case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode {
+  cells ++= MMap[String, AtomishThing](
+    "length"    -> AlienProxy(nonetoint(() => value.length)),
+    "+"         -> AlienProxy(_.args match {
+      case List(Left(AtomishArray(app))) => AtomishArray(value ++ app)
+    }),
+    "at"        -> AlienProxy(_.args match {
+      case List(Left(AtomishInt(x))) => value(x)
+      case _                         => AtomishUnset
     })
   )
 }
