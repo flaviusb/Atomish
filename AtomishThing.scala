@@ -166,6 +166,19 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
   )
 }
 
+case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode {
+  cells ++= MMap[String, AtomishThing](
+    "length"    -> AlienProxy(nonetoint(() => value.size)),
+    "+"         -> AlienProxy(_.args match {
+      case List(Left(AtomishMap(app))) => AtomishMap(value ++ app)
+    }),
+    "at"        -> AlienProxy(_.args match {
+      case List(Left(x: AtomishThing)) => value(x)
+      case _                           => AtomishUnset
+    })
+  )
+}
+
 case class AtomishMessage(name: String) extends AtomishThing with AtomishCode
 
 case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode

@@ -34,7 +34,11 @@ class PreUniverse {
     "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
       case Left(x) => Array[AtomishThing](x)
       case _       => Array[AtomishThing]()
-    }).toArray))
+    }).toArray)),
+    "Map"       -> AlienProxy(arg_blob => AtomishMap(arg_blob.args.map(_ match {
+      case Right((x, y)) => MMap[AtomishThing, AtomishThing](AtomishString(x) -> y)
+      case _             => MMap[AtomishThing, AtomishThing]()
+    }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _)))
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
     case Seq(AtomishMessage(first), rest @ _*) => {
