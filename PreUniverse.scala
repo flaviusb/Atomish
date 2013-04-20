@@ -20,6 +20,16 @@ class PreUniverse {
         roots(name) = value
         value
       }
+    }),
+    "cell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name))) => {
+        roots(name)
+      }
+    }),
+    "hasCell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name))) => {
+        AtomishBoolean((roots.isDefinedAt(name)) && (roots(name) != AtomishUnset))
+      }
     })
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
