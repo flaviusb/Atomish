@@ -69,7 +69,7 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
     "-" -> AlienProxy(inttoint(value -_)),
     "×" -> AlienProxy(inttoint(value * _)),
     "÷" -> AlienProxy(inttoint(value / _)),
-    "asString" -> AlienProxy(_.args match {
+    "asText" -> AlienProxy(_.args match {
       case List() => AtomishString(value.toString())
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
     })
@@ -82,7 +82,7 @@ case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
     "-" -> AlienProxy(dectodec(value - _)),
     "×" -> AlienProxy(dectodec(value * _)),
     "÷" -> AlienProxy(dectodec(value / _)),
-    "asString" -> AlienProxy(_.args match {
+    "asText" -> AlienProxy(_.args match {
       case List() => AtomishString(value.toString())
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
     })
@@ -146,8 +146,8 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode {
     "+"         -> AlienProxy(strtostr(value + _)),
     "at"        -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
     "substring" -> AlienProxy(intinttostr((x, y) => value.substring(x, y))),
-    "asString" -> AlienProxy(_.args match {
-      case List() => AtomishString(value.toString())
+    "asText"    -> AlienProxy(_.args match {
+      case List() => AtomishString(value)
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
     })
   )
