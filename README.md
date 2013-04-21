@@ -29,12 +29,29 @@ Good enough FFI by way of bridges, alien cells, and alien evaluators.
 This is all supposed to be a replacement for the places I use Ioke, but need something faster with a smaller memory footprint, like as a web app on a small VPS.
 
 Inspired by Cola/Pepsi/Idst/Maru, Ioke, Common Lisp and Haskell.
+
 Other influences: Perl 5&6 (Guts on the outside, TMTWTDI, Moose, 6Model), Io (Mirrors), OCaml (module system), Potion.
+
 Minor influences: Atomy, Atomo, Slate, Erlang, Snobol, MetaLua.
 
 
 Is it any good?
 ---------------
 
-At the moment, no. There really isn't anything here except my pipe dreams.
+At the moment, no. The bootstrap pre-interpreter can run some basic pre-atomish code, but this is still mostly my pipe dreams.
+
+Project Organisation
+--------------------
+
+Each subfolder has it's own README.md detailing relevant things.
+
+The project is dual licensed under the GPLv3 and Death and Repudiation liceses, which are available in the file LICENCE.
+
+Installing instructions are in INSTALL.md
+
+General project layout explanations are in LAYOUT.md
+
+My assorted noodling and ill-considered thoughts at any given time about the project are in scratch.md
+
+General syntax and semantics of the language Atomish are in atomish.md
 
