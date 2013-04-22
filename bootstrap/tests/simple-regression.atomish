@@ -1,5 +1,5 @@
 say(1.0 +(1.0) ×(1.1) -(22.2) +(3.0 ÷(2.0)))
-say("foo").say("moo") . say("who?")
+say("fo\no").say("moo") . say("wh\\o?")
 say("hello" +(" ") +("world"))
 say("qwerty" length)
 say("q" length())

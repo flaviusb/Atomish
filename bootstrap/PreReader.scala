@@ -22,7 +22,12 @@ object AtomishParser extends RegexParsers {
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
   def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
-  def string   = ("\"" ~ """([^"\\]|\\")*""".r ~ "\"") ^^ { case "\"" ~ str ~ "\"" => AtomishString(str) }
+  def string_escapes = ("""\\""" | """\n""" | """\"""") ^^ {
+    case """\\""" => """\"""
+    case """\n""" => "\n"
+    case """\"""" => "\""
+  }
+  def string   = ("\"" ~ (("""([^"\\])""".r | string_escapes)*) ~ "\"") ^^ { case "\"" ~ str ~ "\"" => AtomishString(str.foldLeft("")(_ + _)) }
   def identifier: Parser[AtomishMessage] = ("[a-zA-Z][a-zA-Z0-9_:$!?]*".r | "[~!@$%^&*_=\'`/?×÷+-]+".r) ^^ { AtomishMessage(_) }
   def code_tiny_bit: Parser[AtomishCode] = (commated | atomish_call | string | rational | integer | identifier | nll) // This will eventually be a big union of all types that can constitute standalone code
   def code_bit: Parser[List[AtomishCode]] = (((nll ~ code_tiny_bit) | nll | (wss ~ code_tiny_bit))*) ^^ { _.flatMap { 
