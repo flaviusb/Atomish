@@ -211,3 +211,12 @@ case class AlienProxy(call: AtomishArgs => AtomishThing) extends AtomishThing {
   // Deal with 'activate' in evaller; this is graceless, but necessary for bootstrapping
   def activate(args: AtomishArgs): AtomishThing = call(args)
 }
+
+class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(a =>
+    universe(AtomishPlace(AtomishMessage("eval"))).get.asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))) with AtomishCode {
+  cells("activatable") = AtomishBoolean(true)
+  cells("code")        = code
+  //override def activate(args: AtomishArgs): AtomishThing = {
+  //  universe(AtomishPlace(AtomishMessage("eval"))).asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(cells("code")))))
+  //}
+}

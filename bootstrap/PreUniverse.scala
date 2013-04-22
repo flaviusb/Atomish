@@ -38,7 +38,14 @@ class PreUniverse {
     "Map"       -> AlienProxy(arg_blob => AtomishMap(arg_blob.args.map(_ match {
       case Right((x, y)) => MMap[AtomishThing, AtomishThing](AtomishString(x) -> y)
       case _             => MMap[AtomishThing, AtomishThing]()
-    }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _)))
+    }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _))),
+    "primfn"    -> AlienProxy(_.args match {
+      case List(Left(AtomishString(str))) => {
+        new AtomishMacro(this,
+          roots("read").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(AtomishString(str))))).asInstanceOf[AtomishCode])
+      }
+      case _                              => null //boom
+    })
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
     case Seq(AtomishMessage(first), rest @ _*) => {
