@@ -206,17 +206,17 @@ case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (Ato
 
 case class AtomishArgs(args: List[Either[AtomishThing, (String, AtomishThing)]])
 
-case class AlienProxy(call: AtomishArgs => AtomishThing) extends AtomishThing {
+case class AlienProxy(var call: AtomishArgs => AtomishThing) extends AtomishThing {
   cells("activatable") = AtomishBoolean(true)
   // Deal with 'activate' in evaller; this is graceless, but necessary for bootstrapping
   def activate(args: AtomishArgs): AtomishThing = call(args)
 }
 
-class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(a =>
-    universe(AtomishPlace(AtomishMessage("eval"))).get.asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))) with AtomishCode {
+class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(null) with AtomishCode {
+  call = macro_exec;
   cells("activatable") = AtomishBoolean(true)
   cells("code")        = code
-  //override def activate(args: AtomishArgs): AtomishThing = {
-  //  universe(AtomishPlace(AtomishMessage("eval"))).asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(cells("code")))))
-  //}
+  def macro_exec(a: AtomishArgs): AtomishThing = {
+    universe(AtomishPlace(AtomishMessage("eval"))).get.asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(cells("code")))))
+  }
 }
