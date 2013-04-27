@@ -1,8 +1,11 @@
 package net.flaviusb.atomish
 
-import scala.collection.mutable.{Map => MMap}
+import scala.collection.mutable.{Map => MMap, MutableList => MList}
 
-class PreUniverse {
+class PreUniverse { self =>
+  var gensyms: MMap[Int, AtomishThing] = MMap[Int, AtomishThing]()
+  var currgs: Int = 1
+  var scopes: MList[MMap[String, AtomishThing]] = MList() // New scopes go on the front of the list
   var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing](
     "version" -> AtomishDecimal(0.1),
     "say"     -> AlienProxy(_.args match {
@@ -17,20 +20,23 @@ class PreUniverse {
     }),
     "setCell"   -> AlienProxy(_.args match {
       case List(Left(AtomishString(name)), Left(value: AtomishThing)) => {
-        roots(name) = value
+        self(AtomishPlace(AtomishMessage(name))) = Option(value)
         value
       }
     }),
     "cell"   -> AlienProxy(_.args match {
       case List(Left(AtomishString(name))) => {
-        roots(name)
+        self(AtomishPlace(AtomishMessage(name))).get
       }
     }),
     "hasCell"   -> AlienProxy(_.args match {
       case List(Left(AtomishString(name))) => {
-        AtomishBoolean((roots.isDefinedAt(name)) && (roots(name) != AtomishUnset))
+        val thing = self(AtomishPlace(AtomishMessage(name)))
+        AtomishBoolean((thing != None) && (thing != Some(AtomishUnset)))
       }
     }),
+    //"let"       -> AlienProxy(_.args match {
+    //}),
     "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
       case Left(x) => Array[AtomishThing](x)
       case _       => Array[AtomishThing]()
@@ -45,7 +51,12 @@ class PreUniverse {
           roots("read").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(AtomishString(str))))).asInstanceOf[AtomishCode])
       }
       case _                              => null //boom
-    })
+    })/*,
+    "gensym"    -> AlienProxy(_.args match {
+      case _ => {
+        AtomishGenSym(currgs++)
+      }
+    })*/
   )
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
     case Seq(AtomishMessage(first), rest @ _*) => {
@@ -79,18 +90,28 @@ class PreUniverse {
     }
   }
   def apply(key: AtomishPlace): Option[AtomishThing] = {
+    // Try from each scope backwards, or from root if all scopes fail
+    for (base <- scopes) {
+      var foo = apply_by_parts(key, base)
+      if (foo != None) {
+        return foo;
+      }
+    }
+    return apply_by_parts(key, roots)
+  }
+  def apply_by_parts(key: AtomishPlace, base: MMap[String, AtomishThing]): Option[AtomishThing] = {
     key.form match {
       case AtomishMessage(name) => {
-        return roots.get(name)
+        return base.get(name)
       }
       case AtomishCall(name, _) => {
-        return roots.get(name)
+        return base.get(name)
       }
       //case AtomishForm(head :: rest) => {
       //  var root = roots.get(head)
       //}
       case MessageChain(Array(AtomishMessage(first), messages @ _*)) => {
-        var root = roots.get(first)
+        var root = base.get(first)
         root match {
           case Some(actual) => {
             if (messages.isEmpty) {
@@ -104,5 +125,30 @@ class PreUniverse {
       case _ => None
     }
   }
-  def update(key: AtomishPlace, value: Option[AtomishThing]) = { }
+  def update(key: AtomishPlace, value: Option[AtomishThing]) {
+    // Try from each scope backwards, or from root if all scopes fail
+    for (base <- scopes) {
+      var foo = apply_by_parts(key, base)
+      if (foo != None) {
+        update_internal(key, value, base)
+        return;
+      }
+    }
+    update_internal(key, value, roots)
+  }
+  def update_internal(key: AtomishPlace, value: Option[AtomishThing], base: MMap[String, AtomishThing]) {
+    // For the moment, just deal with 'stringlike' keys
+    var true_val = value match {
+      case Some(x) => x
+      case _       => AtomishUnset
+    }
+    key.form match {
+      case AtomishMessage(name) => {
+        base(name) = true_val
+      }
+      case AtomishCall(name, _) => {
+        base(name) = true_val
+      }
+    }
+  }
 }
