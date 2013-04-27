@@ -25,5 +25,5 @@ say("Empty map length: " +(Map() length asText))
 say("1) a = " +(a asText))
 primfn("say(\"a +(1)\") . setCell(\"a\", a +(2))") ()
 say("2) a = " +(a asText))
-let(a, 1, b, 2 +(2), say("3) a = " +(a asText))) .
+let(a, 1, b, 2 +(2), say("3) a = " +(a asText)) . say(x +("oof")) . say(b) . ) .
 say("4) a = " +(a asText))
