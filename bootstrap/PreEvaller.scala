@@ -35,11 +35,15 @@ object PreEvaller {
         relground(AtomishPlace(msg)) match {
           case Some(subject) => {
             subject match {
-              case (proxy: AlienProxy) => {
+              case (proxy: AlienProxy)  => {
                 // Evaluate the arguments and pack the results into an argument list
                 // For now we just deal with plain positional arguments
                 var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
                 proxy.activate(AtomishArgs(parsed_args))
+              }
+              case (proxy: QAlienProxy) => {
+                // Args remain quoted
+                proxy.activate(AtomishCommated(msg.args))
               }
             }
           }
@@ -50,7 +54,8 @@ object PreEvaller {
           case Some(subject) => {
             if(subject(AtomishString("activatable")) == AtomishBoolean(true)) {
               subject match {
-                case (proxy: AlienProxy) => proxy.activate(AtomishArgs(List()))
+                case (proxy: AlienProxy)  => proxy.activate(AtomishArgs(List()))
+                case (proxy: QAlienProxy) => proxy.activate(AtomishCommated(Array()))
               }
             } else {
               subject
@@ -68,6 +73,10 @@ object PreEvaller {
                 var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
                 proxy.activate(AtomishArgs(parsed_args))
               }
+              case (proxy: QAlienProxy) => {
+                // Args remain quoted
+                proxy.activate(AtomishCommated(msg.args))
+              }
             }
           }
         }
@@ -80,7 +89,8 @@ object PreEvaller {
               case Some(subject) => {
                 if(subject(AtomishString("activatable")) == AtomishBoolean(true)) {
                   subject match {
-                    case (proxy: AlienProxy) => proxy.activate(AtomishArgs(List()))
+                    case (proxy: AlienProxy)  => proxy.activate(AtomishArgs(List()))
+                    case (proxy: QAlienProxy) => proxy.activate(AtomishCommated(Array()))
                   }
                 } else {
                   subject
@@ -98,6 +108,10 @@ object PreEvaller {
                     var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
                     proxy.activate(AtomishArgs(parsed_args))
                   }
+                  case (proxy: QAlienProxy) => {
+                    // Args remain quoted
+                    proxy.activate(AtomishCommated(msg.args))
+                  }
                 }
               }
             }
@@ -114,6 +128,10 @@ object PreEvaller {
               case Some(existing_ground) => {
                 existing_ground match {
                   case prx: AlienProxy => prx.activate(AtomishArgs(x.map(q => Left(eval(universe)(q))).toList))
+                  case (proxy: QAlienProxy) => {
+                    // Args remain quoted
+                    proxy.activate(AtomishCommated(x))
+                  }
                 }
               }
               case None    => {

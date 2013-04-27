@@ -212,6 +212,12 @@ case class AlienProxy(var call: AtomishArgs => AtomishThing) extends AtomishThin
   def activate(args: AtomishArgs): AtomishThing = call(args)
 }
 
+case class QAlienProxy(var call: AtomishCommated => AtomishThing) extends AtomishThing {
+  cells("activatable") = AtomishBoolean(true)
+  // Deal with 'activate' in evaller; this is graceless, but necessary for bootstrapping
+  def activate(args: AtomishCommated): AtomishThing = call(args)
+}
+
 class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(null) with AtomishCode {
   call = macro_exec;
   cells("activatable") = AtomishBoolean(true)
