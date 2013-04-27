@@ -47,6 +47,26 @@ class PreUniverse { self =>
       scopes = sco;
       AtomishUnset
     }),
+    "true"      -> AtomishBoolean(true),
+    "false"     -> AtomishBoolean(false),
+    "if"        -> QAlienProxy(ctd => {
+      if(ctd.args.length == 0) {
+        AtomishUnset
+      } else {
+        var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(0)))))
+        if (test == AtomishBoolean(true)) {
+          if(ctd.args.length >= 2) {
+            self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))))
+          } else {
+            AtomishUnset
+          }
+        } else if((test == AtomishBoolean(false)) && (ctd.args.length >= 3)) {
+          self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))))
+        } else {
+          AtomishUnset
+        }
+      }
+    }),
     "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
       case Left(x) => Array[AtomishThing](x)
       case _       => Array[AtomishThing]()

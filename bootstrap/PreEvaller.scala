@@ -120,6 +120,7 @@ object PreEvaller {
           case AtomishInt(x)           => AtomishInt(x)
           case AtomishDecimal(x)       => AtomishDecimal(x)
           case AtomishString(x)        => AtomishString(x)
+          case AtomishBoolean(x)       => AtomishBoolean(x)
           case AtomishCommated(x: Array[AtomishCode]) => {
             // Send as activation to ground if ground exists
             // Otherwise, if the commated only has one arg, 
@@ -165,6 +166,7 @@ object PreEvaller {
       case AtomishInt(x)           => AtomishInt(x)
       case AtomishDecimal(x)       => AtomishDecimal(x)
       case AtomishString(x)        => AtomishString(x)
+      case AtomishBoolean(x)       => AtomishBoolean(x)
     }
   }
 }
