@@ -41,6 +41,7 @@ class PreUniverse { self =>
       var arrcode: Array[AtomishCode] = ((ctd.args grouped(2) filter(_.length == 1) flatMap((x: Array[AtomishCode]) => x)).toArray);
       var code = arrcode(0)
       scopes = (MMap() ++ args) +: scopes;
+      //println(code.toString())
       self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
       var sco = scopes.tail;
       scopes = sco;
