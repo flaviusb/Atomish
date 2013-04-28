@@ -61,6 +61,15 @@ object AtomishThing {
 object AtomishUnset extends AtomishThing
 
 case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode {
+  /*cells ++= MMap[String, AtomishThing](
+    "=="      -> AlienProxy(booltobool(_ == value)),
+    "and"     -> AlienProxy(booltobool(_ && value)),
+    "or"      -> AlienProxy(booltobool(_ || value)),
+    "not"     -> AlienProxy(a => AtomishBoolean(!value)),
+    "isTrue"  -> AlienProxy(a => AtomishBoolean(value)),
+    "isFalse" -> AlienProxy(a => AtomishBoolean(!value)),
+    "asText"  -> AlienProxy(a => AtomishString(value.toString()))
+  )*/
 }
 
 case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
@@ -72,7 +81,10 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
     "asText" -> AlienProxy(_.args match {
       case List() => AtomishString(value.toString())
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
-    })
+    }),
+    "=="     -> AlienProxy(inttobool(_ == value)),
+    "!="     -> AlienProxy(inttobool(_ != value)),
+    "<=>"    -> AlienProxy(inttoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 }))
   )
 }
 
@@ -85,7 +97,10 @@ case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
     "asText" -> AlienProxy(_.args match {
       case List() => AtomishString(value.toString())
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
-    })
+    }),
+    "=="     -> AlienProxy(dectobool(_ == value)),
+    "!="     -> AlienProxy(dectobool(_ != value)),
+    "<=>"    -> AlienProxy(dectoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 }))
  )
 }
 
@@ -93,6 +108,14 @@ case class dectodec(call: Double => Double) extends (AtomishArgs => AtomishDecim
   override def apply(args: AtomishArgs): AtomishDecimal = {
     args.args match {
       case List(Left(AtomishDecimal(x))) => AtomishDecimal(call(x))
+      case _                             => null // Should error
+    }
+  }
+}
+case class dectoint(call: Double => Int) extends (AtomishArgs => AtomishInt) {
+  override def apply(args: AtomishArgs): AtomishInt = {
+    args.args match {
+      case List(Left(AtomishDecimal(x))) => AtomishInt(call(x))
       case _                             => null // Should error
     }
   }
@@ -136,6 +159,30 @@ case class intinttostr(call: (Int, Int) => String) extends (AtomishArgs => Atomi
     args.args match {
       case List(Left(AtomishInt(x)), Left(AtomishInt(y))) => AtomishString(call(x, y))
       case _                                              => null // Should error
+    }
+  }
+}
+case class booltobool(call: Boolean => Boolean) extends (AtomishArgs => AtomishBoolean) {
+  override def apply(args: AtomishArgs): AtomishBoolean = {
+    args.args match {
+      case List(Left(AtomishBoolean(x))) => AtomishBoolean(call(x))
+      case _                             => null // Should error
+    }
+  }
+}
+case class inttobool(call: Int => Boolean) extends (AtomishArgs => AtomishBoolean) {
+  override def apply(args: AtomishArgs): AtomishBoolean = {
+    args.args match {
+      case List(Left(AtomishInt(x))) => AtomishBoolean(call(x))
+      case _                         => null // Should error
+    }
+  }
+}
+case class dectobool(call: Double => Boolean) extends (AtomishArgs => AtomishBoolean) {
+  override def apply(args: AtomishArgs): AtomishBoolean = {
+    args.args match {
+      case List(Left(AtomishDecimal(x))) => AtomishBoolean(call(x))
+      case _                             => null // Should error
     }
   }
 }
