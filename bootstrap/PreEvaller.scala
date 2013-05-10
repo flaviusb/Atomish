@@ -82,6 +82,7 @@ object PreEvaller {
         }
       }
       case AtomishForm(head::rest) => {
+        var nl_val = false
         var base: AtomishThing = head match {
           // Do message lookup first, left to right, minding activatability
           case (msg: AtomishMessage)   => {
@@ -124,7 +125,7 @@ object PreEvaller {
           case AtomishCommated(x: Array[AtomishCode]) => {
             // Send as activation to ground if ground exists
             // Otherwise, if the commated only has one arg, 
-            // we treat as possibly singal value term in an expression
+            // we treat as possibly a single value term in an expression
             ground match {
               case Some(existing_ground) => {
                 existing_ground match {
@@ -150,13 +151,20 @@ object PreEvaller {
             // As recursive evalling should always be the last thing we do, and side effects are packed away
             // in Scala stack frames as such, we can simply start a new eval chain if rest is not empty
             if (rest != List()) {
+              nl_val = true
               eval(universe)(AtomishForm(rest), None)
             } else {
-              AtomishNL
+              ground match {
+                case Some(gr) => {
+                  nl_val = true
+                  gr
+                }
+                case None     => AtomishNL
+              }
             }
           }
         }
-        if((rest != List()) && (base != AtomishNL)) {
+        if((rest != List()) && (base != AtomishNL) && (!nl_val)) {
           eval(universe)(AtomishForm(rest), Some(base))
         } else {
           base
