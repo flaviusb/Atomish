@@ -253,6 +253,8 @@ case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (Ato
 
 case class AtomishArgs(args: List[Either[AtomishThing, (String, AtomishThing)]])
 
+case class AtomishComment(text: String) extends AtomishThing with AtomishCode
+
 case class AlienProxy(var call: AtomishArgs => AtomishThing) extends AtomishThing {
   cells("activatable") = AtomishBoolean(true)
   // Deal with 'activate' in evaller; this is graceless, but necessary for bootstrapping
