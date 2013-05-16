@@ -77,30 +77,46 @@ class PreUniverse { self =>
       } else {
         // We have at least one arg and a body; that arg may be a docstring though
         var (docstring: Option[String], args: Array[AtomishCode], code: AtomishCode) = (ctd.args(0) match {
-          case AtomishString(docstring) => {
+          case AtomishForm(List(AtomishString(docstring))) => {
             var args = ctd.args.drop(1).dropRight(1)
+            //println(args.toList)
             var code = ctd.args.last
             (Some(docstring), args, code)
           }
           case _                        => {
             var args = ctd.args.dropRight(1)
+            //println(args.toList)
             var code = ctd.args.last
             (None, args, code)
           }
         })
         val finargs: Array[AtomishCode] = args.flatMap(_ match {
-          case (name: AtomishMessage) => Array[AtomishCode](name)
-          case _                      => Array[AtomishCode]()
+          case AtomishForm(List(name: AtomishMessage)) => Array[AtomishCode](name)
+          case _                                       => Array[AtomishCode]()
         })
         var fn = AlienProxy(x => {
-          val let_args: Array[AtomishCode] = finargs.zip(x.args.flatMap(_ match {
+          //println(finargs.toList)
+          //println(x.args)
+          val letified_args: Array[(String, AtomishThing)] = finargs.zip(x.args.flatMap(_ match {
             case Left(x: AtomishCode) => Array[AtomishCode](x) // This line is because we accept args which are atomishthings, but we can only construct calls which are atomishcodes
             case _                    => Array[AtomishCode]()
-          })).flatMap((x: (AtomishCode, AtomishCode)) => Array[AtomishCode](x._1, x._2))
-          val final_code = AtomishCall("let", let_args :+ code)
-          self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(final_code))))
+          })).map((x: (AtomishCode, AtomishCode)) => (x._1.asInstanceOf[AtomishMessage].name,
+        self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x._2))))))
+          //val final_code = AtomishCall("let", let_args :+ code)
+          //println("fn code: " + final_code.toString())
+          //self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(final_code))))
+      scopes = (MMap() ++ letified_args) +: scopes;
+      //println(code.toString())
+      //println("Array(" + letified_args.map(ar => "(\"" + ar._1 + "\", " + ar._2.toString() + ")").mkString(", ") + ")")
+      //println(scopes)
+      var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
+      var sco = scopes.tail;
+      scopes = sco;
+      //println(result.toString())
+      //AtomishUnset
+      result
         })
-        for(docs <- docstring) { fn.cells("docstring") = AtomishString(docs) }
+        for(docs <- docstring) { fn.cells("documentation") = AtomishString(docs) }
         fn
       }
     }),

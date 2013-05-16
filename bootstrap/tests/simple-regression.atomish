@@ -32,3 +32,17 @@ let(a, 55, say("5> a = " +(a asText)) . let(a, 66, say("6> a = " +(a asText)) . 
 say("8> a = " +(a asText))
 say(if(true, 1, 2))
 say(if(false, 1, 2))
+setCell("sayfo", fn("sayfoooooooo!", aaa, say(aaa asText +("fo"))))
+say(cell("sayfo"))
+cell("sayfo") ("sqad")
+say(cell("sayfo") documentation)
+sayfo(45 asText)
+setCell("type_guess", fn("Guesses a few types based on cells.", it,
+  if(it hasCell("÷"), say("Guess: Number"),
+    if(it hasCell("substring"), say("Guess: Text"),
+      if(it hasCell("activatable"),
+        if(it cell("activatable"),
+          say("Guess: function"),
+          say("I don't know :-(")))))))
+type_guess(3)
+type_guess("3")

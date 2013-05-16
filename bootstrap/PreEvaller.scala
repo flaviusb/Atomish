@@ -97,6 +97,10 @@ object PreEvaller {
                   subject
                 }
               }
+              case None => {
+                println("case None, for message: " + msg.toString())
+                throw new scala.MatchError(None)
+              }
             }
           }
           case (msg: AtomishCall)      => {
