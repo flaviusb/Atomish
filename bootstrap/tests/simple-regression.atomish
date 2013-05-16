@@ -45,4 +45,8 @@ setCell("type_guess", fn("Guesses a few types based on cells.", it,
           say("Guess: function"),
           say("I don't know :-(")))))))
 type_guess(3)
+type_guess(-5.555)
 type_guess("3")
+type_guess(Array())
+type_guess(Map())
+type_guess(true)

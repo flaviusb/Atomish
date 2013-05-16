@@ -21,6 +21,8 @@ trait AtomishThing {
   }
 }
 
+trait IdempotentEval // That is, an AtomishThing that 'eval's to itself
+
 object AtomishThing {
   var bootstrap_cells: MMap[String, AtomishThing => AtomishThing] = MMap(
     "hasCell"     -> { thing => AlienProxy(_.args match {
@@ -58,9 +60,9 @@ object AtomishThing {
   )
 }
 
-object AtomishUnset extends AtomishThing
+object AtomishUnset extends AtomishThing 
 
-case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode {
+case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode with IdempotentEval {
   /*cells ++= MMap[String, AtomishThing](
     "=="      -> AlienProxy(booltobool(_ == value)),
     "and"     -> AlienProxy(booltobool(_ && value)),
@@ -72,7 +74,7 @@ case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode 
   )*/
 }
 
-case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
+case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "+" -> AlienProxy(inttoint(value + _)),
     "-" -> AlienProxy(inttoint(value -_)),
@@ -88,7 +90,7 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode {
   )
 }
 
-case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode {
+case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "+" -> AlienProxy(dectodec(value + _)),
     "-" -> AlienProxy(dectodec(value - _)),
@@ -187,7 +189,7 @@ case class dectobool(call: Double => Boolean) extends (AtomishArgs => AtomishBoo
   }
 }
 
-case class AtomishString(value: String) extends AtomishThing with AtomishCode {
+case class AtomishString(value: String) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(value.length)),
     "+"         -> AlienProxy(strtostr(value + _)),
@@ -200,7 +202,7 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode {
   )
 }
 
-case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode {
+case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.length)),
     "+"         -> AlienProxy(_.args match {
@@ -213,7 +215,7 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
   )
 }
 
-case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode {
+case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.size)),
     "+"         -> AlienProxy(_.args match {
