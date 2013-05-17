@@ -14,9 +14,36 @@ object PreEvaller {
   }
   def eval(universe: PreUniverse)(ast: AtomishCode, ground: Option[AtomishThing] = None): AtomishThing = {
     val relground = relgrounder(universe, ground) _
-    //println(ast)
+    // Remove comment nodes
+    def uncomment(code: AtomishCode): Option[AtomishCode] = Option(code match {
+      case (rem: AtomishComment)   => null
+      case AtomishCall(call, args) => AtomishCall(call, args.flatMap(_ match {
+        case (rem: AtomishComment)   => Array[AtomishCode]()
+        case x                       => uncomment(x).toArray[AtomishCode]
+      }))
+      case AtomishForm(x)          => AtomishForm(x.flatMap(xx => uncomment(xx)))
+      case x                       => x
+    })
+    def unpick(code: AtomishCode): Array[AtomishCode] = code match {
+      case AtomishForm(x) => x.toArray[AtomishCode]
+      case x              => Array[AtomishCode](x)
+    }
+    def stitch(code: AtomishCode): AtomishCode = code match {
+      case AtomishCall(call, args) => AtomishCall(call, args.map(_ match {
+        case AtomishForm(x)   => AtomishForm(x.flatMap(unpick _).map(stitch _))
+        case (x: AtomishCode) => stitch(x)
+      }))
+      case AtomishForm(x)          => AtomishForm(x.flatMap(unpick _).map(stitch _))
+      case x                       => x
+    }
+    var canonical = uncomment(ast).map(stitch _).getOrElse(AtomishNL)
+    //println("Original AST:")
+    //println(PreScalaPrinter.print_with_forms(ast))
+    //println("Canonicalised AST:")
+    //println(PreScalaPrinter.print_with_forms(canonical))
+    //println("Ground:")
     //println(ground)
-    ast match {
+    canonical match {
       // Do message lookup first, left to right, minding activatability
       case (msg: AtomishMessage)   => {
         relground(AtomishPlace(msg)) match {
@@ -193,6 +220,7 @@ object PreEvaller {
       }
       // Last we fall through all the 'self evaluating' types
       case (x: IdempotentEval) => x
+      case AtomishNL           => AtomishNL
     }
   }
 }

@@ -18,6 +18,10 @@ object PreAtomishInterpreter {
     case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print(arg))
     case _                             => null // Should error
   })
+  u.roots("print_with_forms") = AlienProxy(_.args match {
+    case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print_with_forms(arg))
+    case _                             => null // Should error
+  })
   def main(args: Array[String]): Unit = {
     var src_file = new BufferedSource(new FileInputStream(new File(args(0))))
     var src = AtomishString(src_file.addString(new StringBuilder(1024)).toString())

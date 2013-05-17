@@ -59,7 +59,10 @@ setCell("defmacro", macro(
       setCell(arguments at(0), eval(unquote(''(macro(`(the_code)))))))
   )
 ))
-defmacro("foobarizer", say(arguments at(0) +(" … foobar")))
+defmacro("foobarizer",
+  say(arguments at(0) +(" … foobar"))
+  say(print(arguments)))
 say("And now, foobarizing...\n")
-say(print(cell("foobarizer")))
+#;say(print(cell("foobarizer")))
+say(print_with_forms(cell("foobarizer") code))
 foobarizer("Hello World!")
