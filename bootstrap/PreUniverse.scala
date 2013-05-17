@@ -120,6 +120,9 @@ class PreUniverse { self =>
         fn
       }
     }),
+    "'"         -> QAlienProxy(ctd => {
+      AtomishCall("'", ctd.args)
+    }),
     "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
       case Left(x) => Array[AtomishThing](x)
       case _       => Array[AtomishThing]()
