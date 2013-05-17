@@ -123,6 +123,57 @@ class PreUniverse { self =>
     "'"         -> QAlienProxy(ctd => {
       AtomishCall("'", ctd.args)
     }),
+    "unquote"   -> AlienProxy(_.args match {
+      case List(Left(AtomishCall("'", x))) => {
+        if(x.length != 1) {
+          AtomishCommated(x)
+        } else {
+          x(0)
+        }
+      }
+    }),
+    "''"        -> QAlienProxy(ctd => {
+      def unqq(code: AtomishCode): AtomishCode = code match {
+        case AtomishCall("'", x)     => AtomishCall("'", x)
+        case AtomishCall("`", x)     => {
+          var qq_bits = x.flatMap(arg =>
+            self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(arg)))) match {
+              case a: AtomishCode => Array[AtomishCode](a)
+              case _              => Array[AtomishCode]()
+            })
+          if(qq_bits.length != 1) {
+            AtomishCommated(qq_bits)
+          } else {
+            qq_bits(0)
+          }
+        }
+        case AtomishCall(call, args) => AtomishCall(call, args.map(x => unqq(x)))
+        case AtomishForm(x)          => AtomishForm(x.map(y => unqq(y)))
+      }
+      AtomishCall("'",
+        ctd.args.map(x => unqq(x)))
+    }),
+    "macro"     -> QAlienProxy(ctd => {
+      var mac: QAlienProxy = QAlienProxy(null)
+      mac.call = (macargs => {
+        var arg_scope  = MMap[String, AtomishThing](
+          "arguments" -> AtomishArray(macargs.args.map(_ match { // We have to unwrap unneeded AtomishForms
+            case AtomishForm(List(x)) => x
+            case x                    => x
+          }).asInstanceOf[Array[AtomishThing]])
+        )
+        scopes = arg_scope +: scopes;
+        var result: AtomishThing = AtomishUnset
+        if(mac.cells.isDefinedAt("code")) {
+          result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(mac.cells("code")))))
+        }
+        var sco = scopes.tail;
+        scopes = sco;
+        result
+      })
+      mac.cells("code") = if(ctd.args.length > 0) { ctd.args(0) } else { AtomishNL }
+      mac
+    }),
     "Array"     -> AlienProxy(arg_blob => AtomishArray(arg_blob.args.flatMap(_ match {
       case Left(x) => Array[AtomishThing](x)
       case _       => Array[AtomishThing]()

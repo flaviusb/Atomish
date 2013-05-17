@@ -51,4 +51,15 @@ type_guess(Array())
 type_guess(Map())
 type_guess(true)
 '(a b c)
-say('(a, b c(d)))
+say(print('(a, b c(d))))
+setCell("defmacro", macro(
+  say(print(arguments))
+  if(arguments length !=(0),
+    let(the_code, arguments at(1),
+      setCell(arguments at(0), eval(unquote(''(macro(`(the_code)))))))
+  )
+))
+defmacro("foobarizer", say(arguments at(0) +(" … foobar")))
+say("And now, foobarizing...\n")
+say(print(cell("foobarizer")))
+foobarizer("Hello World!")

@@ -29,6 +29,10 @@ object PreEvaller {
               subject
             }
           }
+          case None => {
+            println("case None, for message: " + msg.toString())
+            throw new scala.MatchError(None)
+          }
         }
       }
       case (msg: AtomishCall)      => {
@@ -47,6 +51,10 @@ object PreEvaller {
               }
             }
           }
+          case None => {
+            println("case None, for message: " + msg.toString())
+            throw new scala.MatchError(None)
+          }
         }
       }
       case AtomishForm(List(msg: AtomishMessage))   => {
@@ -60,6 +68,10 @@ object PreEvaller {
             } else {
               subject
             }
+          }
+          case None => {
+            println("case None, for message: " + msg.toString())
+            throw new scala.MatchError(None)
           }
         }
       }
@@ -78,6 +90,10 @@ object PreEvaller {
                 proxy.activate(AtomishCommated(msg.args))
               }
             }
+          }
+          case None => {
+            println("case None, for message: " + msg.toString())
+            throw new scala.MatchError(None)
           }
         }
       }
@@ -118,6 +134,10 @@ object PreEvaller {
                     proxy.activate(AtomishCommated(msg.args))
                   }
                 }
+              }
+              case None => {
+                println("case None, for message: " + msg.toString())
+                throw new scala.MatchError(None)
               }
             }
           } 
