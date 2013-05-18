@@ -77,6 +77,20 @@ class PreUniverse { self =>
       } else {
         // We have at least one arg and a body; that arg may be a docstring though
         var (docstring: Option[String], args: Array[AtomishCode], code: AtomishCode) = (ctd.args(0) match {
+          case AtomishForm(List(AtomishInterpolatedString(chunks))) => {
+            var docstring: String = chunks.map(_ match {
+            case x: AtomishString => x
+            case x: AtomishCode   => (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x)))) match {
+                case y: AtomishString  => y
+                case AtomishInt(y)     => y.toString()
+                case AtomishDecimal(y) => y.toString()
+                case z                 => z.toString()
+              })}).mkString;
+            var args = ctd.args.drop(1).dropRight(1)
+            //println(args.toList)
+            var code = ctd.args.last
+            (Some(docstring), args, code)
+          }
           case AtomishForm(List(AtomishString(docstring))) => {
             var args = ctd.args.drop(1).dropRight(1)
             //println(args.toList)

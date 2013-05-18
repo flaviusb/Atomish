@@ -1,6 +1,7 @@
 package net.flaviusb.atomish
 
 import scala.util.parsing.combinator._
+import scala.collection.mutable.{Map => MMap, MutableList => MList}
 
 import scala.language.postfixOps
 
@@ -22,12 +23,46 @@ object AtomishParser extends RegexParsers {
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
   def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
-  def string_escapes = ("""\\""" | """\n""" | """\"""") ^^ {
+  def qstring_escapes = ("""\\""" | """\n""" | """\"""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
     case """\"""" => "\""
   }
-  def string   = ("\"" ~ (("""([^"\\])""".r | string_escapes)*) ~ "\"") ^^ { case "\"" ~ str ~ "\"" => AtomishString(str.foldLeft("")(_ + _)) }
+  def sstring_escapes = ("""\\""" | """\n""" | """\]""") ^^ {
+    case """\\""" => """\"""
+    case """\n""" => "\n"
+    case """\]""" => "]"
+  }
+  def interpolated_section: Parser[AtomishCode] = "#{" ~ code ~ "}" ^^ { case "#{" ~ interpolated_code ~ "}" => interpolated_code }
+  def qstring   = ("\"" ~ ((interpolated_section | (("""([^"\\])""".r | qstring_escapes) ^^ { AtomishString(_) }))*) ~ "\"") ^^ {
+    case "\"" ~ List(AtomishString(x)) ~  "\"" => AtomishString(x)
+    case "\"" ~ chunks ~ "\"" => {
+      var interpolated_list = MList[AtomishCode]()
+      var accumulated_string = ""
+      for(chunk <- chunks) {
+        chunk match {
+          case AtomishString(x) => accumulated_string += x
+          case x: AtomishCode   => {
+            if(accumulated_string != "") {
+              interpolated_list += AtomishString(accumulated_string)
+              accumulated_string = ""
+            }
+            interpolated_list += x
+          }
+        }
+      }
+      if(accumulated_string != "") {
+        interpolated_list += AtomishString(accumulated_string)
+        accumulated_string = ""
+      }
+      interpolated_list match {
+        case MList(x: AtomishString) => x
+        case _                       => AtomishInterpolatedString(interpolated_list.toList)
+      }
+    }
+  }
+  def sstring   = ("#[" ~ (("""([^\]\\])""".r | sstring_escapes)*) ~ "]") ^^ { case "#[" ~ str ~ "]" => AtomishString(str.foldLeft("")(_ + _)) }
+  def string = (sstring | qstring)
   def identifier: Parser[AtomishMessage] = ("[a-zA-Z][a-zA-Z0-9_:$!?]*".r | "[~!@$%^&*_=\'`/?×÷+-]+".r) ^^ { AtomishMessage(_) }
   def code_tiny_bit: Parser[AtomishCode] = (comment | commated | atomish_call | string | rational | integer | identifier | nll) // This will eventually be a big union of all types that can constitute standalone code
   def code_bit: Parser[List[AtomishCode]] = (((nll ~ code_tiny_bit) | nll | (wss ~ code_tiny_bit))*) ^^ { _.flatMap { 

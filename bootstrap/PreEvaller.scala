@@ -170,6 +170,17 @@ object PreEvaller {
           } 
           // Last we fall through all the 'self evaluating' types
           case (x: IdempotentEval) => x
+          case AtomishInterpolatedString(chunks) => {
+            AtomishString(chunks.map(_ match {
+              case AtomishString(x) => x
+              case x: AtomishCode   => (eval(universe)(x, ground) match {
+                case y: AtomishString  => y
+                case AtomishInt(y)     => y.toString()
+                case AtomishDecimal(y) => y.toString()
+                case z                 => z.toString()
+              })
+            }).mkString)
+          }
           case AtomishCommated(x: Array[AtomishCode]) => {
             // Send as activation to ground if ground exists
             // Otherwise, if the commated only has one arg, 
@@ -220,6 +231,12 @@ object PreEvaller {
       }
       // Last we fall through all the 'self evaluating' types
       case (x: IdempotentEval) => x
+      case AtomishInterpolatedString(chunks) => {
+        AtomishString(chunks.map(_ match {
+          case x: AtomishString => x
+          case x: AtomishCode   => eval(universe)(x, ground)
+        }).mkString)
+      }
       case AtomishNL           => AtomishNL
     }
   }

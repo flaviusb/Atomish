@@ -56,7 +56,7 @@ setCell("defmacro", macro(
   say(print(arguments))
   if(arguments length !=(0),
     let(the_code, arguments at(1),
-      setCell(arguments at(0), eval(unquote(''(macro(`(the_code)))))))
+      setCell(eval(arguments at(0)), eval(unquote(''(macro(`(the_code)))))))
   )
 ))
 defmacro("foobarizer",
@@ -66,3 +66,5 @@ say("And now, foobarizing...\n")
 #;say(print(cell("foobarizer")))
 say(print_with_forms(cell("foobarizer") code))
 foobarizer("Hello World!")
+say("#{1330 +(7)}erpo\"]late")
+say(#[#{1330 +(7)}erpo"\]late])
