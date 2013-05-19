@@ -29,12 +29,26 @@ object PreAtomishInterpreter {
       println("No file specified.")
       return
     }
-    var source = args(0);
+    var source_name = args(0);
+    var file_source = new File(source_name)
     u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
       "programArguments" -> AtomishArray(args.drop(1).map(x => AtomishString(x)))
     ))
-    var src_file = new BufferedSource(new FileInputStream(new File(source)))
-    var src = AtomishString(src_file.addString(new StringBuilder(1024)).toString())
+    u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
+      "cwd"              -> AtomishString(file_source.getAbsoluteFile().getParent()),
+      "exists?"          -> AlienProxy(_.args match {
+        case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).exists)
+        case _                                    => AtomishUnset //Should soft error
+      }),
+      "removeFile!"      -> AlienProxy(_.args match {
+        case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).delete())
+      }),
+      "parentOf"         -> AlienProxy(_.args match {
+        case List(Left(AtomishString(file_name))) => AtomishString((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).getParent())
+      })
+    ))
+    var stream_source = new BufferedSource(new FileInputStream(file_source))
+    var src = AtomishString(stream_source.addString(new StringBuilder(1024)).toString())
     //println(src)
     e(r.read(src), None);
   }

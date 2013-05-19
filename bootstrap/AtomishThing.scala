@@ -198,6 +198,14 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
     "asText"    -> AlienProxy(_.args match {
       case List() => AtomishString(value)
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
+    }),
+    "=="        -> AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => AtomishBoolean(value == x)
+      case _                            => AtomishBoolean(false)
+    }),
+    "!="        -> AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => AtomishBoolean(value != x)
+      case _                            => AtomishBoolean(true)
     })
   )
 }
