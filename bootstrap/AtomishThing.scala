@@ -280,3 +280,8 @@ class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(
     universe(AtomishPlace(AtomishMessage("eval"))).get.asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(cells("code")))))
   }
 }
+
+case class AtomishOrigin(origin_with: MMap[String, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
+  cells("with") = AlienProxy(x => AtomishUnset)
+  cells ++= origin_with;
+}

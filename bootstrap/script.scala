@@ -19,3 +19,6 @@ u.roots("print_with_forms") = AlienProxy(_.args match {
   case _                             => null // Should error
 })
 
+u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
+  "programArguments" -> AtomishArray()
+))

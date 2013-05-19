@@ -1,2 +1,2 @@
 #!/bin/bash
-scala net.flaviusb.atomish.PreAtomishInterpreter $@
+scala net.flaviusb.atomish.PreAtomishInterpreter "$@"
