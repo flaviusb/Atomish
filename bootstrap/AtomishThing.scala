@@ -213,6 +213,9 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
 // AtomishInterpolatedString class should decay in the evaller into an AtomishString
 case class AtomishInterpolatedString(value: List[AtomishCode]) extends AtomishThing with AtomishCode 
 
+case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing with AtomishCode with IdempotentEval {
+}
+
 case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.length)),

@@ -1,3 +1,5 @@
 say(print(System programArguments))
 say(FileSystem exists?("test-file"))
 say(FileSystem cwd ==(FileSystem parentOf("test-file")))
+say(print(/foo bar baz/g))
+say(print(/foo "bar"* \/baz\//asxm))
