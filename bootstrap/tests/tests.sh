@@ -16,5 +16,12 @@ if [ $errorCounter -ne 1 ]
 then
   tests="tests"
 fi
-echo "$errorCounter $tests failed."
+FGRED=`printf "\033[31m"`
+NORMAL=`printf "\033[m"`
+if [ $errorCounter -ne 0 ]
+then
+  echo "${FGRED}$errorCounter $tests failed.${NORMAL}"
+else
+  echo "$errorCounter $tests failed."
+fi
 exit $errorCounter
