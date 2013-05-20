@@ -214,6 +214,10 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
 case class AtomishInterpolatedString(value: List[AtomishCode]) extends AtomishThing with AtomishCode 
 
 case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing with AtomishCode with IdempotentEval {
+  cells ++= MMap[String, AtomishThing](
+    "pattern"   -> AtomishString(regex),
+    "flags"     -> AtomishArray(flags.toArray)
+  )
 }
 
 case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
