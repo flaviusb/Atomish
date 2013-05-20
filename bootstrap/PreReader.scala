@@ -23,22 +23,25 @@ object AtomishParser extends RegexParsers {
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
   def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
-  def regex_escapes = ("""\/""" | """\\""" | """\n""") ^^ {
+  def regex_escapes = ("""\/""" | """\\""" | """\n""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
+    case """\r""" => "\r"
     case """\/""" => "/"
   }
   def regex    = ("/" ~ ((regex_escapes | """[^/\\]""".r)*) ~ "/" ~ (("[a-zA-Z]".r)*)) ^^ {
     case "/" ~ regex_chunks ~ "/" ~ flags => AtomishRegex(regex_chunks.mkString, flags.distinct)
   }
-  def qstring_escapes = ("""\\""" | """\n""" | """\"""") ^^ {
+  def qstring_escapes = ("""\\""" | """\n""" | """\"""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
+    case """\r""" => "\r"
     case """\"""" => "\""
   }
-  def sstring_escapes = ("""\\""" | """\n""" | """\]""") ^^ {
+  def sstring_escapes = ("""\\""" | """\n""" | """\]""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
+    case """\r""" => "\r"
     case """\]""" => "]"
   }
   def interpolated_section: Parser[AtomishCode] = "#{" ~ code ~ "}" ^^ { case "#{" ~ interpolated_code ~ "}" => interpolated_code }
