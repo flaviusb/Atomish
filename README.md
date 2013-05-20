@@ -45,7 +45,7 @@ Project Organisation
 
 Each subfolder has it's own README.md detailing relevant things.
 
-The project is dual licensed under the GPLv3 and Death and Repudiation liceses, which are available in the file LICENCE.
+The project is dual licensed under the GPLv3 and Death and Repudiation licences, which are available in the file LICENCE. Vendored files (in `bootstrap/vendor`) are available under their own licences, which are listed at the top of each file.
 
 Installing instructions are in INSTALL.md
 

@@ -1,2 +1,2 @@
 #!/bin/bash
-scala net.flaviusb.atomish.PreAtomishInterpreter "$@"
+scala -classpath ".:./vendor" net.flaviusb.atomish.PreAtomishInterpreter "$@"

@@ -8,7 +8,7 @@ You will need a Java 7 sdk, and a recent Scala (I use 2.10.1 for development). B
 Then from the project root:
 
     cd bootstrap
-    scalac -feature PreReader.scala PreUniverse.scala AtomishThing.scala AtomishPlace.scala PreEvaller.scala PrePrinter.scala PreInterpreter.scala
+    ./mk.sh
 
 The preinterpreter can be invoked through a shellscript found at `bootstrap/preatomish.sh`
 
