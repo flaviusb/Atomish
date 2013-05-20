@@ -17,11 +17,12 @@ then
   tests="tests"
 fi
 FGRED=`printf "\033[31m"`
+FGGREEN=`printf "\033[32m"`
 NORMAL=`printf "\033[m"`
 if [ $errorCounter -ne 0 ]
 then
   echo "${FGRED}$errorCounter $tests failed.${NORMAL}"
 else
-  echo "$errorCounter $tests failed."
+  echo "${FGGREEN}$errorCounter $tests failed.${NORMAL}"
 fi
 exit $errorCounter
