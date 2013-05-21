@@ -3,6 +3,8 @@ package net.flaviusb.atomish
 import scala.language.experimental.macros
 import scala.collection.mutable.{Map => MMap}
 
+import org.jregex.{Pattern, Replacer}
+
 // AtomishThing is the supertype of all the container types for all 'things' that are reified in Atomish
 trait AtomishThing {
   var cells: MMap[String, AtomishThing] = MMap()
@@ -191,21 +193,41 @@ case class dectobool(call: Double => Boolean) extends (AtomishArgs => AtomishBoo
 
 case class AtomishString(value: String) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
-    "length"    -> AlienProxy(nonetoint(value.length)),
-    "+"         -> AlienProxy(strtostr(value + _)),
-    "at"        -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
-    "substring" -> AlienProxy(intinttostr((x, y) => value.substring(x, y))),
-    "asText"    -> AlienProxy(_.args match {
+    "length"     -> AlienProxy(nonetoint(value.length)),
+    "+"          -> AlienProxy(strtostr(value + _)),
+    "at"         -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
+    "substring"  -> AlienProxy(intinttostr((x, y) => value.substring(x, y))),
+    "asText"     -> AlienProxy(_.args match {
       case List() => AtomishString(value)
       case _      => null // Not sure what to do here - maybe swallow arguments silently?
     }),
-    "=="        -> AlienProxy(_.args match {
+    "=="         -> AlienProxy(_.args match {
       case List(Left(AtomishString(x))) => AtomishBoolean(value == x)
       case _                            => AtomishBoolean(false)
     }),
-    "!="        -> AlienProxy(_.args match {
+    "!="         -> AlienProxy(_.args match {
       case List(Left(AtomishString(x))) => AtomishBoolean(value != x)
       case _                            => AtomishBoolean(true)
+    }),
+    "replace"    -> AlienProxy(_.args match {
+      case List(Left(AtomishString(str_regex)), Left(AtomishString(replace))) => {
+        var regex = new Pattern(Pattern.quote(str_regex))
+        AtomishString(regex.replacer(replace).replaceFirst(value))
+      }
+      case List(Left(AtomishRegex(pattern, flags)), Left(AtomishString(replace))) => {
+        var regex = new Pattern(pattern, flags.mkString)
+        AtomishString(regex.replacer(replace).replaceFirst(value))
+      }
+    }),
+    "replaceAll" -> AlienProxy(_.args match {
+      case List(Left(AtomishString(str_regex)), Left(AtomishString(replace))) => {
+        var regex = new Pattern(Pattern.quote(str_regex))
+        AtomishString(regex.replacer(replace).replace(value))
+      }
+      case List(Left(AtomishRegex(pattern, flags)), Left(AtomishString(replace))) => {
+        var regex = new Pattern(pattern, flags.mkString)
+        AtomishString(regex.replacer(replace).replace(value))
+      }
     })
   )
 }
@@ -216,7 +238,7 @@ case class AtomishInterpolatedString(value: List[AtomishCode]) extends AtomishTh
 case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing with AtomishCode with IdempotentEval {
   cells ++= MMap[String, AtomishThing](
     "pattern"   -> AtomishString(regex),
-    "flags"     -> AtomishArray(flags.toArray)
+    "flags"     -> AtomishArray(flags.map(x => AtomishString(x)).toArray)
   )
 }
 
