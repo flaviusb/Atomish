@@ -318,7 +318,20 @@ class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(
   }
 }
 
-case class AtomishOrigin(origin_with: MMap[String, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
-  cells("with") = AlienProxy(x => AtomishUnset)
+case class AtomishOrigin(var origin_with: MMap[String, AtomishThing] = MMap[String, AtomishThing]()) extends AtomishThing with AtomishCode with IdempotentEval {
+  cells("with") = AlienProxy(x => {
+    x.args.foreach(_ match {
+      case Right((cellName, cellValue)) => {
+        origin_with(cellName) = cellValue;
+        cells(cellName) = cellValue;
+      }
+    })
+    this
+  })
+  cells("mimic") = AlienProxy(x => {
+    var y = AtomishOrigin(origin_with)
+    y.cells = cells;
+    y
+  })
   cells ++= origin_with;
 }

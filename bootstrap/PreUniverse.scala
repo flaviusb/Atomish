@@ -196,6 +196,7 @@ class PreUniverse { self =>
       case Right((x, y)) => MMap[AtomishThing, AtomishThing](AtomishString(x) -> y)
       case _             => MMap[AtomishThing, AtomishThing]()
     }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _))),
+    "Origin"    -> AtomishOrigin(),
     "primfn"    -> AlienProxy(_.args match {
       case List(Left(AtomishString(str))) => {
         new AtomishMacro(this,
