@@ -7,6 +7,7 @@ import org.jregex.{Pattern, Replacer}
 
 // AtomishThing is the supertype of all the container types for all 'things' that are reified in Atomish
 trait AtomishThing {
+  var pre_type = "Thing"
   var cells: MMap[String, AtomishThing] = MMap()
   // apply should respect the MOP, but does not deal with activatability
   def apply(key: AtomishString): AtomishThing = {
@@ -26,6 +27,7 @@ trait AtomishThing {
 trait IdempotentEval // That is, an AtomishThing that 'eval's to itself
 
 object AtomishThing {
+  var post_bootstrap: MMap[(String, String), AtomishThing => AtomishThing] = MMap()
   var bootstrap_cells: MMap[String, AtomishThing => AtomishThing] = MMap(
     "hasCell"     -> { thing => AlienProxy(_.args match {
       case List(Left(AtomishString(x))) => {
@@ -35,8 +37,10 @@ object AtomishThing {
           if(thing.cells(x) == AtomishUnset) {
             AtomishBoolean(false)
           } else {
-          AtomishBoolean(true)
+            AtomishBoolean(true)
           }
+        } else if(AtomishThing.post_bootstrap.isDefinedAt((thing.pre_type, x))) {
+          AtomishBoolean(true)
         } else {
           AtomishBoolean(AtomishThing.bootstrap_cells.isDefinedAt(x))
         }
@@ -47,6 +51,8 @@ object AtomishThing {
       case List(Left(AtomishString(x))) => {
         if(thing.cells.isDefinedAt(x)) {
           thing.cells(x)
+        } else if(AtomishThing.post_bootstrap.isDefinedAt((thing.pre_type, x))) {
+          AtomishThing.post_bootstrap((thing.pre_type, x))(thing)
         } else {
           AtomishThing.bootstrap_cells(x)(thing)
         }
@@ -62,21 +68,16 @@ object AtomishThing {
   )
 }
 
-object AtomishUnset extends AtomishThing 
+object AtomishUnset extends AtomishThing {
+  pre_type = "Unset"
+}
 
 case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode with IdempotentEval {
-  /*cells ++= MMap[String, AtomishThing](
-    "=="      -> AlienProxy(booltobool(_ == value)),
-    "and"     -> AlienProxy(booltobool(_ && value)),
-    "or"      -> AlienProxy(booltobool(_ || value)),
-    "not"     -> AlienProxy(a => AtomishBoolean(!value)),
-    "isTrue"  -> AlienProxy(a => AtomishBoolean(value)),
-    "isFalse" -> AlienProxy(a => AtomishBoolean(!value)),
-    "asText"  -> AlienProxy(a => AtomishString(value.toString()))
-  )*/
+  pre_type = "Boolean"
 }
 
 case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Int"
   cells ++= MMap[String, AtomishThing](
     "+" -> AlienProxy(inttoint(value + _)),
     "-" -> AlienProxy(inttoint(value -_)),
@@ -93,6 +94,7 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with Ide
 }
 
 case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Decimal"
   cells ++= MMap[String, AtomishThing](
     "+" -> AlienProxy(dectodec(value + _)),
     "-" -> AlienProxy(dectodec(value - _)),
@@ -192,6 +194,7 @@ case class dectobool(call: Double => Boolean) extends (AtomishArgs => AtomishBoo
 }
 
 case class AtomishString(value: String) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Text"
   cells ++= MMap[String, AtomishThing](
     "length"     -> AlienProxy(nonetoint(value.length)),
     "+"          -> AlienProxy(strtostr(value + _)),
@@ -236,6 +239,7 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
 case class AtomishInterpolatedString(value: List[AtomishCode]) extends AtomishThing with AtomishCode 
 
 case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Regex"
   cells ++= MMap[String, AtomishThing](
     "pattern"   -> AtomishString(regex),
     "flags"     -> AtomishArray(flags.map(x => AtomishString(x)).toArray)
@@ -243,6 +247,7 @@ case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing
 }
 
 case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Array"
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.length)),
     "+"         -> AlienProxy(_.args match {
@@ -251,11 +256,17 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
     "at"        -> AlienProxy(_.args match {
       case List(Left(AtomishInt(x))) => value(x)
       case _                         => AtomishUnset
-    })
+    }),
+    "keys"      -> AlienProxy(x => AtomishArray(0.to(value.length - 1).toArray.map(key => AtomishInt(key)))),
+    "values"    -> AlienProxy(x => AtomishArray(value))/*,
+    "each"      -> QAlienProxy(_.args match {
+      case Array(message: AtomishMessage) => 
+    })*/
   )
 }
 
 case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Map"
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.size)),
     "+"         -> AlienProxy(_.args match {
@@ -264,7 +275,9 @@ case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishTh
     "at"        -> AlienProxy(_.args match {
       case List(Left(x: AtomishThing)) => value(x)
       case _                           => AtomishUnset
-    })
+    }),
+    "keys"      -> AlienProxy(x => AtomishArray(value.keys.toArray)),
+    "values"    -> AlienProxy(x => AtomishArray(value.values.toArray))
   )
 }
 
@@ -319,6 +332,7 @@ class AtomishMacro(universe: PreUniverse, code: AtomishCode) extends AlienProxy(
 }
 
 case class AtomishOrigin(var origin_with: MMap[String, AtomishThing] = MMap[String, AtomishThing]()) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Origin"
   cells("with") = AlienProxy(x => {
     x.args.foreach(_ match {
       case Right((cellName, cellValue)) => {
