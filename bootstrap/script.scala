@@ -63,6 +63,21 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
   ("Boolean", "not")     -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
   ("Boolean", "isTrue")  -> { thing => AlienProxy(a => AtomishBoolean(thing.asInstanceOf[AtomishBoolean].value)) },
   ("Boolean", "isFalse") -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
-  ("Boolean", "asText")  -> { thing => AlienProxy(a => AtomishString(thing.asInstanceOf[AtomishBoolean].value.toString())) }
+  ("Boolean", "asText")  -> { thing => AlienProxy(a => AtomishString(thing.asInstanceOf[AtomishBoolean].value.toString())) },
+  ("Array", "each")      -> { thing => QAlienProxy(_.args match {
+    case Array(message) => {
+      thing.asInstanceOf[AtomishArray].value.foreach(inner =>
+          u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message), Left(inner))))
+      )
+      AtomishUnset
+    }
+  }) },
+  ("Array", "map")       -> { thing => QAlienProxy(_.args match {
+    case Array(message) => {
+      AtomishArray(thing.asInstanceOf[AtomishArray].value.map(inner =>
+          u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message), Left(inner))))
+      ))
+    }
+  }) }
 )
 
