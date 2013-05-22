@@ -1,6 +1,6 @@
 package net.flaviusb.atomish
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, Writer, Reader, BufferedReader, StringReader, IOException, FileReader, FileWriter}
 import scala.io.{BufferedSource}
 
 import scala.collection.mutable.{Map => MMap}
@@ -45,6 +45,26 @@ object PreAtomishInterpreter {
       }),
       "parentOf"         -> AlienProxy(_.args match {
         case List(Left(AtomishString(file_name))) => AtomishString((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).getParent())
+      }),
+      "withOpenFile"     -> AlienProxy(_.args match {
+        case List(Left(AtomishString(file_name)), Left(lexical_thingy)) => {
+          var io_file = new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)
+          var writer = new FileWriter(io_file);
+          var io = AtomishOrigin(MMap[String, AtomishThing](
+            "put"   -> AlienProxy(_.args match {
+              case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
+            }),
+            "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
+          ))
+          var ret = lexical_thingy match {
+            case q: AlienProxy  => q.activate(AtomishArgs(List(Left(io))))
+            case q: QAlienProxy => q.activate(AtomishCommated(Array(io)))
+          }
+          //io.cells("flush").asInstanceOf[AlienProxy].activate(AtomishArgs(List()))
+          writer.flush()
+          writer.close()
+          ret
+        }
       })
     ))
     var stream_source = new BufferedSource(new FileInputStream(file_source))

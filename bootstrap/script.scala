@@ -34,6 +34,26 @@ u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
   }),
   "parentOf"         -> AlienProxy(_.args match {
     case List(Left(AtomishString(file_name))) => AtomishString((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).getParent())
+  }),
+  "withOpenFile"     -> AlienProxy(_.args match {
+    case List(Left(AtomishString(file_name)), Left(lexical_thingy)) => {
+      var io_file = new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)
+      var writer = new FileWriter(io_file);
+      var io = AtomishOrigin(MMap[String, AtomishThing](
+        "put"   -> AlienProxy(_.args match {
+          case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
+        }),
+        "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
+      ))
+      var ret = lexical_thingy match {
+        case q: AlienProxy  => q.activate(AtomishArgs(List(Left(io))))
+        case q: QAlienProxy => q.activate(AtomishCommated(Array(io)))
+      }
+      //io.cells("flush").asInstanceOf[AlienProxy].activate(AtomishArgs(List()))
+      writer.flush()
+      writer.close()
+      ret
+    }
   })
 ))
 
