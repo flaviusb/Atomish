@@ -56,4 +56,13 @@ u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
     }
   })
 ))
+AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishThing](
+  ("Boolean", "==")      -> { thing => AlienProxy(booltobool(_ == thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "and")     -> { thing => AlienProxy(booltobool(_ && thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "or")      -> { thing => AlienProxy(booltobool(_ || thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "not")     -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "isTrue")  -> { thing => AlienProxy(a => AtomishBoolean(thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "isFalse") -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
+  ("Boolean", "asText")  -> { thing => AlienProxy(a => AtomishString(thing.asInstanceOf[AtomishBoolean].value.toString())) }
+)
 
