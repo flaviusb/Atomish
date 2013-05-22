@@ -258,10 +258,7 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
       case _                         => AtomishUnset
     }),
     "keys"      -> AlienProxy(x => AtomishArray(0.to(value.length - 1).toArray.map(key => AtomishInt(key)))),
-    "values"    -> AlienProxy(x => AtomishArray(value))/*,
-    "each"      -> QAlienProxy(_.args match {
-      case Array(message: AtomishMessage) => 
-    })*/
+    "values"    -> AlienProxy(x => AtomishArray(value))
   )
 }
 

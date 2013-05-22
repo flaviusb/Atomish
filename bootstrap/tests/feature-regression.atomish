@@ -18,3 +18,5 @@ setCell("doctype", fn(extension,
     "xml", say("xml, yeah!"). 0)))
 doctype("xhtml")
 doctype("xml")
+say(print(Array(true, false, true) map(not)))
+say(print(Array(0, 1, 2, 5, 6, 8, -3) map(+(4) asText +("tyu"))))
