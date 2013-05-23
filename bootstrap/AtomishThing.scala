@@ -89,7 +89,11 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with Ide
     }),
     "=="     -> AlienProxy(inttobool(_ == value)),
     "!="     -> AlienProxy(inttobool(_ != value)),
-    "<=>"    -> AlienProxy(inttoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 }))
+    "<=>"    -> AlienProxy(inttoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 })),
+    "<"      -> AlienProxy(inttobool(a => value < a)),
+    "<="     -> AlienProxy(inttobool(a => value <= a)),
+    ">"      -> AlienProxy(inttobool(a => value > a)),
+    ">="     -> AlienProxy(inttobool(a => value >= a))
   )
 }
 
@@ -106,7 +110,11 @@ case class AtomishDecimal(value: Double) extends AtomishThing with AtomishCode w
     }),
     "=="     -> AlienProxy(dectobool(_ == value)),
     "!="     -> AlienProxy(dectobool(_ != value)),
-    "<=>"    -> AlienProxy(dectoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 }))
+    "<=>"    -> AlienProxy(dectoint(a => if(a < value) { -1 } else if(a == value) { 0 } else { -1 })),
+    "<"      -> AlienProxy(dectobool(a => value < a)),
+    "<="     -> AlienProxy(dectobool(a => value <= a)),
+    ">"      -> AlienProxy(dectobool(a => value > a)),
+    ">="     -> AlienProxy(dectobool(a => value >= a))
  )
 }
 
