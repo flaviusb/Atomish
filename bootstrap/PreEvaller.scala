@@ -174,7 +174,7 @@ object PreEvaller {
             AtomishString(chunks.map(_ match {
               case AtomishString(x) => x
               case x: AtomishCode   => (eval(universe)(x, ground) match {
-                case y: AtomishString  => y
+                case AtomishString(y)  => y
                 case AtomishInt(y)     => y.toString()
                 case AtomishDecimal(y) => y.toString()
                 case z                 => z.toString()
