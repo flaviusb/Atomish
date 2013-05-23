@@ -266,7 +266,13 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
       case _                         => AtomishUnset
     }),
     "keys"      -> AlienProxy(x => AtomishArray(0.to(value.length - 1).toArray.map(key => AtomishInt(key)))),
-    "values"    -> AlienProxy(x => AtomishArray(value))
+    "values"    -> AlienProxy(x => AtomishArray(value)),
+    "dropLeft"  -> AlienProxy(_.args match {
+      case List(Left(AtomishInt(to_drop))) => AtomishArray(value.drop(to_drop))
+    }),
+    "dropRight" -> AlienProxy(_.args match {
+      case List(Left(AtomishInt(to_drop))) => AtomishArray(value.dropRight(to_drop))
+    })
   )
 }
 
