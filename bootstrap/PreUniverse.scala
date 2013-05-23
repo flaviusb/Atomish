@@ -36,7 +36,8 @@ class PreUniverse { self =>
       }
     }),
     "let"       -> QAlienProxy(ctd => {
-      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => (x(0).asInstanceOf[AtomishForm].things(0).asInstanceOf[AtomishMessage].name,
+      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => (x(0).asInstanceOf[AtomishForm].things.filter(
+        _ != AtomishNL)(0).asInstanceOf[AtomishMessage].name,
         self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x(1)))))))).toMap;
       var arrcode: Array[AtomishCode] = ((ctd.args grouped(2) filter(_.length == 1) flatMap((x: Array[AtomishCode]) => x)).toArray);
       var code = arrcode(0)
