@@ -1,5 +1,10 @@
 import net.flaviusb.atomish._
 
+import java.io.{File, FileInputStream, Writer, Reader, BufferedReader, StringReader, IOException, FileReader, FileWriter}
+import scala.io.{BufferedSource}
+
+import scala.collection.mutable.{Map => MMap}
+
 var u = new PreUniverse()
 var r = new PreReader()
 var e = PreEvaller.eval(u) _
@@ -20,7 +25,7 @@ u.roots("print_with_forms") = AlienProxy(_.args match {
 })
 
 u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
-  "programArguments" -> AtomishArray()
+  "programArguments" -> AtomishArray(Array())
 ))
 
 u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
