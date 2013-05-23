@@ -1,0 +1,25 @@
+setCell("unless", macro(
+  if(arguments length !=(0),
+    let(the_it, eval(arguments at(0)),
+      if(arguments length >(1),
+        if(the_it,
+          eval(arguments at(1)),
+          if(arguments length >=(2),
+            eval(arguments at(2)))))))))
+setCell("case", macro(
+  if(arguments length >(0),
+    let(value, eval(arguments at(0)),
+        cases, arguments dropLeft(1),
+        testorrec, macro(#;condition, the_code, rest,
+          #;say(print(arguments at(0)))
+          #;say(eval(arguments at(0)))
+          if(eval(arguments at(0)) ==(value),
+            eval(arguments at(1)),
+            if(arguments at(2) length >(1),
+              eval(unquote(''(testorrec(`(arguments at(2) at(0)), `(arguments at(2) at(1)), `(arguments at(2) dropLeft(2)))))),
+              if(arguments at(2) length ==(1),
+                eval(arguments at(2) at(0)))))),
+      if(cases length >(1),
+        eval(unquote(''(testorrec(`(cases at(0)), `(cases at(1)), `(cases dropLeft(2)))))),
+        if(cases length ==(1),
+          eval(cases at(0))))))))

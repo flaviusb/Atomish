@@ -7,17 +7,15 @@ say(("foo bar foobaz" replace(/(f)(o)o/ , "$2$1")))
 say(("foo bar foobaz" replaceAll(/(f)(o)o/ , "$2$1")))
 say(FileSystem withOpenFile("a", fn(x, x put(3.333). 3)))
 say(print(Origin mimic))
-setCell("case", macro(
-  let(value, eval(arguments at(0)),
-    if(eval(arguments at(1)) ==(value),
-      eval(arguments at(2))))
-))
 setCell("doctype", fn(extension,
   say(extension)
   case(extension,
-    "xml", say("xml, yeah!"). 0)))
+    "xml",   say("xml, yeah!"). 0,
+    "xhtml", say("xhtml, okay."). 1,
+             say("I don't know what #{extension} means"). -1)))
 doctype("xhtml")
 doctype("xml")
+doctype("xaml")
 say(print(Array(true, false, true) map(not)))
 say(print(Array(0, 1, 2, 5, 6, 8, -3) map(+(4) asText +("tyu"))))
 Array(3, 4, 5, 6, 9) each(thing, say(thing ÷(3) asText))

@@ -104,3 +104,7 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
   }) }
 )
 
+var prelude_source = new BufferedSource(new FileInputStream(new File("./prelude.atomish")))
+var prelude = AtomishString(prelude_source.addString(new StringBuilder(1024)).toString())
+e(r.read(prelude), None)
+
