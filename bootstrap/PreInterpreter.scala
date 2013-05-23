@@ -82,12 +82,30 @@ object PreAtomishInterpreter {
           )
           AtomishUnset
         }
+        case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+          thing.asInstanceOf[AtomishArray].value.foreach(inner => {
+              u.scopes = MMap(variable -> inner) +: u.scopes;
+              u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))
+              var sco = u.scopes.tail;
+              u.scopes = sco
+          })
+          AtomishUnset
+        }
       }) },
       ("Array", "map")       -> { thing => QAlienProxy(_.args match {
         case Array(message) => {
           AtomishArray(thing.asInstanceOf[AtomishArray].value.map(inner =>
               u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message), Left(inner))))
           ))
+        }
+        case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+          AtomishArray(thing.asInstanceOf[AtomishArray].value.map(inner => {
+              u.scopes = MMap(variable -> inner) +: u.scopes;
+              var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))
+              var sco = u.scopes.tail;
+              u.scopes = sco
+              ret
+          }))
         }
       }) }
     )
