@@ -254,7 +254,7 @@ case class AtomishRegex(regex: String, flags: List[String]) extends AtomishThing
   )
 }
 
-case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
+case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
   pre_type = "Array"
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.length)),
@@ -264,6 +264,10 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
     "at"        -> AlienProxy(_.args match {
       case List(Left(AtomishInt(x))) => value(x)
       case _                         => AtomishUnset
+    }),
+    "at="       -> AlienProxy(_.args match {
+      case List(Left(AtomishInt(x)), Left(new_value)) => { value(x) = new_value; new_value }
+      case _                                          => AtomishUnset
     }),
     "keys"      -> AlienProxy(x => AtomishArray(0.to(value.length - 1).toArray.map(key => AtomishInt(key)))),
     "values"    -> AlienProxy(x => AtomishArray(value)),
@@ -276,7 +280,7 @@ case class AtomishArray(value: Array[AtomishThing]) extends AtomishThing with At
   )
 }
 
-case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
+case class AtomishMap(var value: MMap[AtomishThing, AtomishThing]) extends AtomishThing with AtomishCode with IdempotentEval {
   pre_type = "Map"
   cells ++= MMap[String, AtomishThing](
     "length"    -> AlienProxy(nonetoint(() => value.size)),
@@ -286,6 +290,10 @@ case class AtomishMap(value: MMap[AtomishThing, AtomishThing]) extends AtomishTh
     "at"        -> AlienProxy(_.args match {
       case List(Left(x: AtomishThing)) => value(x)
       case _                           => AtomishUnset
+    }),
+    "at="       -> AlienProxy(_.args match {
+      case List(Left(x: AtomishThing), Left(new_value)) => { value(x) = new_value; new_value }
+      case _                                            => AtomishUnset
     }),
     "keys"      -> AlienProxy(x => AtomishArray(value.keys.toArray)),
     "values"    -> AlienProxy(x => AtomishArray(value.values.toArray))
