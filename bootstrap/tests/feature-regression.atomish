@@ -20,6 +20,7 @@ say(print(Array(true, false, true) map(not)))
 say(print(Array(0, 1, 2, 5, 6, 8, -3) map(+(4) asText +("tyu"))))
 Array(3, 4, 5, 6, 9) each(thing, say(thing ÷(3) asText))
 say(print(Array(3, 4, 5, 6, 9) map(thing, thing ÷(3) asText +("foo"))))
+say(print(Array(1, 2, 3, 4, 5, 6) flatMap(x, Array(x, x -(1), x))))
 XuML = Origin mimic with(
   zod: 37,
   jor: 13)

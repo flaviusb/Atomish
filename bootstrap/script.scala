@@ -101,6 +101,30 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
           ret
       }))
     }
+  }) },
+  ("Array", "flatMap")       -> { thing => QAlienProxy(_.args match {
+    case Array(message) => {
+      AtomishArray(thing.asInstanceOf[AtomishArray].value.flatMap(inner =>
+          u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message),
+            Left(inner)))).asInstanceOf[AtomishArray].value
+      ))
+    }
+    case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+      AtomishArray(thing.asInstanceOf[AtomishArray].value.flatMap(inner => {
+          u.scopes = MMap(variable -> inner) +: u.scopes;
+          var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code)))).asInstanceOf[AtomishArray].value
+          var sco = u.scopes.tail;
+          u.scopes = sco
+          ret
+      }))
+    }
+  }) },
+  ("Origin", "=")        -> { thing => QAlienProxy(_.args match {
+    case Array(AtomishMessage(cell_name), x) => {
+      var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
+      thing.cells(cell_name) = ret
+      ret
+    }
   }) }
 )
 
