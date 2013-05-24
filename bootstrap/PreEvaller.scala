@@ -36,7 +36,48 @@ object PreEvaller {
       case AtomishForm(x)          => AtomishForm(x.flatMap(unpick _).map(stitch _))
       case x                       => x
     }
-    var canonical = uncomment(ast).map(stitch _).getOrElse(AtomishNL)
+    import scala.collection.mutable.Stack;
+    def shuffle_limb(code: Stack[AtomishCode]): Stack[AtomishCode] = {
+      // For now, we just rewrite bare '=' messages into ternary ie '(a s d x = y b c) → '(a s d =(x, y b c))
+      // All other bare symbol message we rewrite into binary ie '(a + (b × c) - e ÷ f) → '(a +(b ×(c)) -(e ÷(f)))
+      var message_chain: Stack[AtomishCode] = Stack()
+      var message_frag:  Stack[AtomishCode] = Stack()
+      code.foreach(code_bit => {
+        code_bit 
+      })
+      code
+    }
+    def shuffle(code: AtomishCode): AtomishCode = code match {
+      //case AtomishCall(call, args) => AtomishCall(call, args.map(arg => shuffle(arg)))
+      //case AtomishCommated(args)   => AtomishCommated(args.map(arg => shuffle(arg)))
+      case AtomishForm(unshuffled) => {
+        var message_chain: Stack[AtomishCode] = Stack()
+        var message_limb:  Stack[AtomishCode] = Stack()
+        unshuffled.foreach(code_bit => {
+          if(code_bit == AtomishNL) {
+            if(message_limb.length > 0) {
+              message_chain pushAll(shuffle_limb(message_limb))
+              message_limb = Stack()
+            }
+            message_chain push(AtomishNL)
+          } else {
+            message_limb push(code_bit)
+          }
+        })
+        if(message_limb.length > 0) {
+          message_chain pushAll(shuffle_limb(message_limb))
+        }
+        var ret = AtomishForm(message_chain.toList)
+        //println("Unshuffled: ")
+        //println(PreScalaPrinter.print_with_forms(AtomishForm(unshuffled)))
+        //println("Shuffled: ")
+        //println(PreScalaPrinter.print_with_forms(ret))
+        ret
+        code
+      }
+      case other          => other
+    }
+    var canonical = shuffle(uncomment(ast).map(stitch _).getOrElse(AtomishNL))
     //println("Original AST:")
     //println(PreScalaPrinter.print_with_forms(ast))
     //println("Canonicalised AST:")
