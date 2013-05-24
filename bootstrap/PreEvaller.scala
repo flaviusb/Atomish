@@ -106,6 +106,31 @@ object PreEvaller {
     //println(ground)
     eval_canonical(universe)(canonical, ground)
   }
+  def parse_args(universe: PreUniverse, msg: AtomishCall): List[Either[AtomishThing, (String, AtomishThing)]] = {
+    msg.args.map(all => all match {
+      case AtomishForm(thing) => {
+        val chomped = thing dropWhile(_ == AtomishNL)
+        if(chomped.length < 2) {
+          Left(eval(universe)(AtomishForm(chomped)))
+        } else {
+          val (arg::rest) = chomped;
+          val kwregex = "^([a-zA-Z0-9_!:?]+):$".r
+          if(arg.isInstanceOf[AtomishMessage]) {
+            arg.asInstanceOf[AtomishMessage].name match {
+              case kwregex(key) => Right(key, eval(universe)(AtomishForm(rest)))
+              case _            => Left(eval(universe)(all))
+            }
+          } else {
+            Left(eval(universe)(all))
+          }
+        }
+      }
+      case _ => {
+        Left(eval(universe)(all))
+      }
+    }).toList
+  }
+
   def eval_canonical(universe: PreUniverse)(canonical: AtomishCode, ground: Option[AtomishThing] = None): AtomishThing = {
     val relground = relgrounder(universe, ground) _
     canonical match {
@@ -133,8 +158,7 @@ object PreEvaller {
             subject match {
               case (proxy: AlienProxy)  => {
                 // Evaluate the arguments and pack the results into an argument list
-                // For now we just deal with plain positional arguments
-                var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
+                var parsed_args = parse_args(universe, msg)
                 proxy.activate(AtomishArgs(parsed_args))
               }
               case (proxy: QAlienProxy) => {
@@ -173,8 +197,7 @@ object PreEvaller {
             subject match {
               case (proxy: AlienProxy) => {
                 // Evaluate the arguments and pack the results into an argument list
-                // For now we just deal with plain positional arguments
-                var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
+                var parsed_args = parse_args(universe, msg)
                 proxy.activate(AtomishArgs(parsed_args))
               }
               case (proxy: QAlienProxy) => {
@@ -217,8 +240,7 @@ object PreEvaller {
                 subject match {
                   case (proxy: AlienProxy) => {
                     // Evaluate the arguments and pack the results into an argument list
-                    // For now we just deal with plain positional arguments
-                    var parsed_args = msg.args.map(arg => Left(eval(universe)(arg))).toList;
+                    var parsed_args = parse_args(universe, msg)
                     proxy.activate(AtomishArgs(parsed_args))
                   }
                   case (proxy: QAlienProxy) => {
