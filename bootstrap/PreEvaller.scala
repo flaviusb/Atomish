@@ -56,7 +56,7 @@ object PreEvaller {
         unshuffled.foreach(code_bit => {
           if(code_bit == AtomishNL) {
             if(message_limb.length > 0) {
-              message_chain push(shuffle_limb(message_limb).reverse)
+              message_chain push(shuffle_limb(message_limb.reverse))
               message_limb = Stack()
             }
             message_chain push(Stack(AtomishNL))
@@ -65,7 +65,7 @@ object PreEvaller {
           }
         })
         if(message_limb.length > 0) {
-          message_chain push(shuffle_limb(message_limb).reverse)
+          message_chain push(shuffle_limb(message_limb.reverse))
         }
         var ret = AtomishForm(message_chain.reverse.flatten.toList)
         //println("Unshuffled: ")
