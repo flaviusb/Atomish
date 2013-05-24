@@ -116,7 +116,8 @@ class PreUniverse { self =>
               kwslurpy = Some((name.substring(1, name.length), (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } )))
               Array[(String, (String, Option[AtomishCode]))]()
             } else {
-              Array[(String, (String, Option[AtomishCode]))](((if(name.endsWith(":")) { "kw" } else {"positional" }), (name, 
+              Array[(String, (String, Option[AtomishCode]))](((if(name.endsWith(":")) { "kw" } else {"positional" }),
+                ((if(name.endsWith(":")) { name.substring(0, name.length - 1) } else { name }), 
                 (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } ))))
             }
           }
@@ -143,7 +144,7 @@ class PreUniverse { self =>
             Array() }).map(a => (AtomishString(a._1), a._2))
             val letified_args: Array[(String, AtomishThing)] = (fpositional.dropRight(slurped_positional_args.length).zip(finargs).map(a
               => (a._2._1, a._1)) ++ finargs.drop(fpositional.length).map(a => (a._1, a._2.get)) ++ fkeyword.dropRight(slurped_keyword_args.length).zip(kwargs).map(a
-              => (a._2._1, a._1)) ++ kwargs.drop(fkeyword.length).map(a => (a._1, a._2.get)) ++ 
+              => (a._2._1, a._1._2)) ++ kwargs.drop(fkeyword.length).map(a => (a._1, a._2.get)) ++ 
               slurpy.map(a => (if(slurped_positional_args.length != 0) { (a._1, AtomishArray(slurped_positional_args)) } else if (a._2
                 != None) { (a._1,
               a._2.get) } else { (a._1, AtomishArray(Array())) })) ++

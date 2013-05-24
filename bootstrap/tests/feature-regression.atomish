@@ -27,3 +27,8 @@ XuML = Origin mimic with(
 XuML foo = "bar"
 say(XuML foo)
 say(XuML jor asText +(XuML zod asText))
+fooer = fn(a, q, b:,
+  say(a asText)
+  say(q asText)
+  say(b asText))
+fooer(1, 2, b: 3)
