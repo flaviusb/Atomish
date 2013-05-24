@@ -40,12 +40,33 @@ object PreEvaller {
     def shuffle_limb(code: Stack[AtomishCode]): Stack[AtomishCode] = {
       // For now, we just rewrite bare '=' messages into ternary ie '(a s d x = y b c) → '(a s d =(x, y b c))
       // All other bare symbol message we rewrite into binary ie '(a + (b × c) - e ÷ f) → '(a +(b ×(c)) -(e ÷(f)))
-      var message_chain: Stack[AtomishCode] = Stack()
       var message_frag:  Stack[AtomishCode] = Stack()
-      code.foreach(code_bit => {
-        code_bit 
-      })
-      code
+      var the_code = code;
+      while(the_code.length > 0) {
+        var code_bit = the_code.pop;
+        code_bit match {
+          case AtomishMessage(name) => {
+            // First we deal with the trinary case
+            if(name == "=") {
+              // There must be something on the lhs
+              if(message_frag.length == 0) {
+                null // Should error
+              } else {
+                var lhs = message_frag.pop;
+                var code2 = shuffle_limb(the_code)
+                message_frag.push(AtomishCall("=", Array(lhs, AtomishForm(code2.toList))))
+                //println(PreScalaPrinter.print_with_forms(AtomishCall("=", Array(AtomishForm(code2.toList)))))
+                the_code = Stack()
+              }
+            } else {
+              // For now, we only shuffle for the trinary case
+              message_frag.push(AtomishMessage(name))
+            }
+          }
+          case other => message_frag.push(other)
+        }
+      }
+      message_frag.reverse
     }
     def shuffle(code: AtomishCode): AtomishCode = code match {
       //case AtomishCall(call, args) => AtomishCall(call, args.map(arg => shuffle(arg)))

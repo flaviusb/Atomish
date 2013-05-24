@@ -204,6 +204,17 @@ class PreUniverse { self =>
           roots("read").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(AtomishString(str))))).asInstanceOf[AtomishCode])
       }
       case _                              => null //boom
+    }),
+    "="         -> QAlienProxy(ctd => ctd.args match {
+      case Array(AtomishMessage(cell_name), x) => {
+        var ret = roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
+        roots(cell_name) = ret
+        ret
+      }
+      //case _                                   => {
+      //  println(PreScalaPrinter.print_with_forms(ctd))
+      //  null
+      //}
     })/*,
     "gensym"    -> AlienProxy(_.args match {
       case _ => {

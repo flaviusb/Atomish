@@ -107,6 +107,13 @@ object PreAtomishInterpreter {
               ret
           }))
         }
+      }) },
+      ("Origin", "=")        -> { thing => QAlienProxy(_.args match {
+        case Array(AtomishMessage(cell_name), x) => {
+          var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
+          thing.cells(cell_name) = ret
+          ret
+        }
       }) }
     )
 
