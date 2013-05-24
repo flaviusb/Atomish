@@ -17,10 +17,10 @@ object PreEvaller {
     // Remove comment nodes
     def uncomment(code: AtomishCode): Option[AtomishCode] = Option(code match {
       case (rem: AtomishComment)   => null
-      case AtomishCall(call, args) => AtomishCall(call, args.flatMap(_ match {
-        case (rem: AtomishComment)   => Array[AtomishCode]()
-        case x                       => uncomment(x).toArray[AtomishCode]
-      }))
+      //case AtomishCall(call, args) => AtomishCall(call, args.flatMap(_ match {
+      //  case (rem: AtomishComment)   => Array[AtomishCode]()
+      //  case x                       => uncomment(x).toArray[AtomishCode]
+      //}))
       case AtomishForm(x)          => AtomishForm(x.flatMap(xx => uncomment(xx)))
       case x                       => x
     })
@@ -84,6 +84,10 @@ object PreEvaller {
     //println(PreScalaPrinter.print_with_forms(canonical))
     //println("Ground:")
     //println(ground)
+    eval_canonical(universe)(canonical, ground)
+  }
+  def eval_canonical(universe: PreUniverse)(canonical: AtomishCode, ground: Option[AtomishThing] = None): AtomishThing = {
+    val relground = relgrounder(universe, ground) _
     canonical match {
       // Do message lookup first, left to right, minding activatability
       case (msg: AtomishMessage)   => {
@@ -252,7 +256,7 @@ object PreEvaller {
             // in Scala stack frames as such, we can simply start a new eval chain if rest is not empty
             if (rest != List()) {
               nl_val = true
-              eval(universe)(AtomishForm(rest), None)
+              eval_canonical(universe)(AtomishForm(rest), None)
             } else {
               ground match {
                 case Some(gr) => {
@@ -265,7 +269,7 @@ object PreEvaller {
           }
         }
         if((rest != List()) && (base != AtomishNL) && (!nl_val)) {
-          eval(universe)(AtomishForm(rest), Some(base))
+          eval_canonical(universe)(AtomishForm(rest), Some(base))
         } else {
           base
         }
