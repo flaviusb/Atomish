@@ -51,29 +51,28 @@ object PreEvaller {
       //case AtomishCall(call, args) => AtomishCall(call, args.map(arg => shuffle(arg)))
       //case AtomishCommated(args)   => AtomishCommated(args.map(arg => shuffle(arg)))
       case AtomishForm(unshuffled) => {
-        var message_chain: Stack[AtomishCode] = Stack()
+        var message_chain: Stack[Stack[AtomishCode]] = Stack()
         var message_limb:  Stack[AtomishCode] = Stack()
         unshuffled.foreach(code_bit => {
           if(code_bit == AtomishNL) {
             if(message_limb.length > 0) {
-              message_chain pushAll(shuffle_limb(message_limb))
+              message_chain push(shuffle_limb(message_limb).reverse)
               message_limb = Stack()
             }
-            message_chain push(AtomishNL)
+            message_chain push(Stack(AtomishNL))
           } else {
             message_limb push(code_bit)
           }
         })
         if(message_limb.length > 0) {
-          message_chain pushAll(shuffle_limb(message_limb))
+          message_chain push(shuffle_limb(message_limb).reverse)
         }
-        var ret = AtomishForm(message_chain.toList)
+        var ret = AtomishForm(message_chain.reverse.flatten.toList)
         //println("Unshuffled: ")
         //println(PreScalaPrinter.print_with_forms(AtomishForm(unshuffled)))
         //println("Shuffled: ")
         //println(PreScalaPrinter.print_with_forms(ret))
         ret
-        code
       }
       case other          => other
     }
