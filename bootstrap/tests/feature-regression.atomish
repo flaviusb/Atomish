@@ -32,3 +32,4 @@ fooer = fn(a, q, b:,
   say(q asText)
   say(b asText))
 fooer(1, 2, b: 3)
+fooer(1, b: 3, 2)
