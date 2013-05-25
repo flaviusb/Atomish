@@ -125,8 +125,8 @@ class PreUniverse { self =>
         }).partition(x => x._1 != "kw")
         val (finargs: Array[(String, Option[AtomishCode])], kwargs: Array[(String, Option[AtomishCode])]) = (finargs_a.map(x => x._2),
           kwargs_a.map(x => x._2))
-        val needed_positional_args = finargs.count(x => x._2 != None)
-        val needed_keyword_args    = kwargs.count(x => x._2 != None)
+        val needed_positional_args = finargs.count(x => x._2 == None)
+        val needed_keyword_args    = kwargs.count(x => x._2 == None)
         var fn = AlienProxy(x => {
           //println(finargs.toList)
           //println(x.args)
@@ -137,6 +137,11 @@ class PreUniverse { self =>
           val (fpositional: Array[AtomishThing], fkeyword: Array[(String, AtomishThing)]) = (fpositional_a.map(_.left.get),
             fkeyword_a.map(_.right.get))
           if((fpositional.length < needed_positional_args) || (fkeyword.length < needed_keyword_args)) {
+            println("Too few args.")
+            println("Got "+fpositional.length.toString()+" positional, needed "+needed_positional_args.toString())
+            println("Got "+fkeyword.length.toString()+" keyword, needed "+needed_keyword_args.toString())
+            println(finargs.toList.toString())
+            println(kwargs.toList.toString())
             null // Should raise a condition - too few arguments
           } else {
             val slurped_positional_args: Array[AtomishThing] = (if(slurpy != None) { fpositional.drop(finargs.length) } else { Array() })
@@ -152,7 +157,7 @@ class PreUniverse { self =>
                 None) { (a._1,
               a._2.get) } else { (a._1, AtomishMap(MMap[AtomishThing, AtomishThing]())) }))
               ).map(a => (a._1,
-              self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(a._2.asInstanceOf[AtomishThing]))))))
+              self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(a._2 /*.asInstanceOf[AtomishThing]*/))))))
               
             scopes = (MMap() ++ letified_args) +: scopes;
             //println(code.toString())
