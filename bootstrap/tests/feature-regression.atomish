@@ -41,3 +41,9 @@ ruuer = fn(a, +:b,
   say(print(b)))
 ruuer(1)
 ruuer(1, 2, 3, r: 4, q: 5)
+euuer = fn(a, +b,
+  say(a asText)
+  say(print(b)))
+euuer(1)
+euuer(1, 2, 3, r: 4, q: 5)
+

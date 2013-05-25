@@ -113,7 +113,7 @@ class PreUniverse { self =>
               kwslurpy = Some((name.substring(2, name.length), (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } )))
               Array[(String, (String, Option[AtomishCode]))]()
             } else if(name.startsWith("+")) {
-              kwslurpy = Some((name.substring(1, name.length), (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } )))
+              slurpy = Some((name.substring(1, name.length), (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } )))
               Array[(String, (String, Option[AtomishCode]))]()
             } else {
               Array[(String, (String, Option[AtomishCode]))](((if(name.endsWith(":")) { "kw" } else {"positional" }),
