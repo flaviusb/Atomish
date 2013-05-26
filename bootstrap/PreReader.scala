@@ -82,8 +82,14 @@ object AtomishParser extends RegexParsers {
     case AtomishNL ~ (code_piece: AtomishCode) => List(AtomishNL, code_piece)
     case AtomishNL                             => List(AtomishNL)
   } }
-  def code: Parser[AtomishForm] = code_tiny_bit ~ code_bit ^^ {
-    case a ~ b => AtomishForm(a::b)
+  def code: Parser[AtomishCode] = code_tiny_bit ~ code_bit ^^ {
+    case a ~ b => {
+      if((b == List(AtomishNL)) || (b == List())) {
+        a
+      } else {
+        AtomishForm(a::b)
+      }
+    }
   }
   def commated_bit: Parser[List[AtomishCode]] = (("," ~ (wss?) ~ code)*) ^^ { _.map { case "," ~ x ~ frag => frag } }
   def commated: Parser[AtomishCommated] = "(" ~ (wss?) ~ ((code ~ (wss?) ~ commated_bit)?) ~ (wss?) ~ ")" ^^ {

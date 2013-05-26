@@ -36,9 +36,10 @@ class PreUniverse { self =>
       }
     }),
     "let"       -> QAlienProxy(ctd => {
-      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => (x(0).asInstanceOf[AtomishForm].things.filter(
-        _ != AtomishNL)(0).asInstanceOf[AtomishMessage].name,
-        self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x(1)))))))).toMap;
+      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => ((x(0) match {
+        case AtomishForm(things)   => things.filter(_ != AtomishNL)(0).asInstanceOf[AtomishMessage].name
+        case AtomishMessage(name)  => name
+      }), self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x(1)))))))).toMap;
       var arrcode: Array[AtomishCode] = ((ctd.args grouped(2) filter(_.length == 1) flatMap((x: Array[AtomishCode]) => x)).toArray);
       var code = arrcode(0)
       scopes = (MMap() ++ args) +: scopes;
@@ -78,7 +79,7 @@ class PreUniverse { self =>
       } else {
         // We have at least one arg and a body; that arg may be a docstring though
         var (docstring: Option[String], args: Array[AtomishCode], code: AtomishCode) = (ctd.args(0) match {
-          case AtomishForm(List(AtomishInterpolatedString(chunks))) => {
+          case AtomishInterpolatedString(chunks) => {
             var docstring: String = chunks.map(_ match {
             case x: AtomishString => x
             case x: AtomishCode   => (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x)))) match {
@@ -92,7 +93,7 @@ class PreUniverse { self =>
             var code = ctd.args.last
             (Some(docstring), args, code)
           }
-          case AtomishForm(List(AtomishString(docstring))) => {
+          case AtomishString(docstring) => {
             var args = ctd.args.drop(1).dropRight(1)
             //println(args.toList)
             var code = ctd.args.last
@@ -108,6 +109,18 @@ class PreUniverse { self =>
         // Separate arguments into kinds
         var (slurpy: Option[(String, Option[AtomishCode])], kwslurpy: Option[(String, Option[AtomishCode])]) = (None, None)
         val (finargs_a: Array[(String, (String, Option[AtomishCode]))], kwargs_a: Array[(String, (String, Option[AtomishCode]))]) = args.flatMap(_ match {
+          case AtomishMessage(name)                               => {
+            if(name.startsWith("+:")) {
+              kwslurpy = Some((name.substring(2, name.length), None))
+              Array[(String, (String, Option[AtomishCode]))]()
+            } else if(name.startsWith("+")) {
+              slurpy = Some((name.substring(1, name.length), None))
+              Array[(String, (String, Option[AtomishCode]))]()
+            } else {
+              Array[(String, (String, Option[AtomishCode]))](((if(name.endsWith(":")) { "kw" } else {"positional" }),
+                ((if(name.endsWith(":")) { name.substring(0, name.length - 1) } else { name }), None)))
+            }
+          }
           case AtomishForm(List(AtomishMessage(name), rest @ _*)) => {
             if(name.startsWith("+:")) {
               kwslurpy = Some((name.substring(2, name.length), (if(rest.length == 0) { None } else { Some(AtomishForm(rest.toList)) } )))
@@ -190,7 +203,7 @@ class PreUniverse { self =>
     "''"        -> QAlienProxy(ctd => {
       def unqq(code: AtomishCode): AtomishCode = code match {
         case AtomishCall("'", x)     => AtomishCall("'", x)
-        case AtomishCall("`", x)     => {
+        case AtomishCall("`", x)     => { // Unquote
           var qq_bits = x.flatMap(arg =>
             self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(arg)))) match {
               case a: AtomishCode => Array[AtomishCode](a)
@@ -202,8 +215,40 @@ class PreUniverse { self =>
             qq_bits(0)
           }
         }
-        case AtomishCall(call, args) => AtomishCall(call, args.map(x => unqq(x)))
-        case AtomishForm(x)          => AtomishForm(x.map(y => unqq(y)))
+        case AtomishCall("`*", x)     => { // Unquote-splicing
+          var qq_bits = x.flatMap(arg =>
+            self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(arg)))) match {
+              case AtomishArray(a) => a.flatMap(_ match {
+                case actual_code: AtomishCode => Array[AtomishCode](actual_code)
+                case _                        => Array[AtomishCode]()
+              }) //TODO: this means that passing in eg functions will cause explosions
+              case AtomishMap(a)   => a.toArray.map(a => AtomishForm(List(AtomishMessage(a._1.asInstanceOf[AtomishString].value + ":"),
+                a._2.asInstanceOf[AtomishCode]))).asInstanceOf[Array[AtomishCode]] //TODO: this means that non-code types can't be spliced into kwargs, which is bad.
+              case a: AtomishCode  => Array[AtomishCode](a)
+              case _               => Array[AtomishCode]()
+            })
+          if(qq_bits.length != 1) {
+            AtomishCommated(qq_bits)
+          } else {
+            qq_bits(0)
+          }
+        }
+        case AtomishCall(call, args) => AtomishCall(call, args.flatMap(x => {
+          var retpre = unqq(x)
+          retpre match {
+            case AtomishCommated(preargs) => preargs
+            case _                        => Array(retpre)
+          }
+        }))
+        case AtomishForm(y)          => AtomishForm(y.flatMap(x => {
+          //println("Forms: "+PreScalaPrinter.print(AtomishForm(y)))
+          var retpre = unqq(x)
+          retpre match {
+            case AtomishCommated(preargs) => preargs
+            case _                        => Array(retpre)
+          }
+        }))
+        case x: AtomishCode               => x
       }
       AtomishCall("'",
         ctd.args.map(x => unqq(x)))

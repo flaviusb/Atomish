@@ -45,10 +45,11 @@ I don't know :-(
 I don't know :-(
 I don't know :-(
 AtomishCall(', AtomishMessage(a), AtomishMessage(b) AtomishCall(c, AtomishMessage(d)))
+AtomishCall(macro, AtomishForm(AtomishCall(say, AtomishForm(AtomishMessage(foo) AtomishCall(+, AtomishInt(4))))  .  AtomishCall(say, AtomishMessage(bar))  .  AtomishInt(3)))
 AtomishArray(Array(AtomishString(foobarizer),  .  AtomishCall(say, AtomishMessage(arguments) AtomishCall(at, AtomishInt(0)) AtomishCall(+, AtomishString( … foobar)))  .  AtomishCall(say, AtomishCall(print, AtomishMessage(arguments)))))
 And now, foobarizing...
 
-AtomishForm( .  AtomishCall(say, AtomishForm(AtomishMessage(arguments) AtomishCall(at, AtomishForm(AtomishInt(0))) AtomishCall(+, AtomishForm(AtomishString( … foobar)))))  .  AtomishCall(say, AtomishForm(AtomishCall(print, AtomishForm(AtomishMessage(arguments))))))
+AtomishForm( .  AtomishCall(say, AtomishForm(AtomishMessage(arguments) AtomishCall(at, AtomishInt(0)) AtomishCall(+, AtomishString( … foobar))))  .  AtomishCall(say, AtomishCall(print, AtomishMessage(arguments))))
 Hello World! … foobar
 AtomishArray(Array(AtomishString(Hello World!)))
 1337erpo"]late

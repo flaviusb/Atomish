@@ -3,8 +3,8 @@ say(FileSystem exists?("test-file"))
 say(FileSystem cwd ==(FileSystem parentOf("test-file")))
 say(print(/foo bar baz/g))
 say(print(/foo "bar"* \/baz\//asxm))
-say(("foo bar foobaz" replace(/(f)(o)o/ , "$2$1")))
-say(("foo bar foobaz" replaceAll(/(f)(o)o/ , "$2$1")))
+say("foo bar foobaz" replace(/(f)(o)o/ , "$2$1"))
+say("foo bar foobaz" replaceAll(/(f)(o)o/ , "$2$1"))
 say(FileSystem withOpenFile("a", fn(x, x put(3.333). 3)))
 say(print(Origin mimic))
 setCell("doctype", fn(extension,
@@ -46,4 +46,16 @@ euuer = fn(a, +b,
   say(print(b)))
 euuer(1)
 euuer(1, 2, 3, r: 4, q: 5)
-
+l = Array(1, 2, 3)
+say(print_with_forms(read("unquote(''(foo(1, 2, `*(l), 7, 8)))")))
+say(print(unquote(''(foo(1, 2, `*(l), 7, 8)))))
+zog = fn(q, w, e,
+  cond(
+    q,       " Q ",
+    w <(e),  "W!",
+    e <(10), "\\e/",
+             "nya."))
+say(zog(true,  1,   2 ))
+say(zog(false, 1,   2 ))
+say(zog(false, 100, 2 ))
+say(zog(false, 100, 20))

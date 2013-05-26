@@ -52,8 +52,11 @@ type_guess(Map())
 type_guess(true)
 '(a b c)
 say(print('(a, b c(d))))
+b = unquote('(say(foo +(4)). say(bar) . 3))
+say(print_with_forms(unquote(''(macro(`(b))))))
 setCell("defmacro", macro(
   say(print(arguments))
+  #;arguments each(x, say(print(x)))
   if(arguments length !=(0),
     let(the_code, arguments at(1),
       setCell(eval(arguments at(0)), eval(unquote(''(macro(`(the_code)))))))

@@ -125,6 +125,9 @@ object PreEvaller {
           }
         }
       }
+      case AtomishCommated(args) => {
+        throw new scala.MatchError("Match error - did not expect commated here - " + PreScalaPrinter.print_with_forms(AtomishCommated(args)))
+      }
       case _ => {
         Left(eval(universe)(all))
       }
@@ -320,8 +323,13 @@ object PreEvaller {
       case (x: IdempotentEval) => x
       case AtomishInterpolatedString(chunks) => {
         AtomishString(chunks.map(_ match {
-          case x: AtomishString => x
-          case x: AtomishCode   => eval(universe)(x, ground)
+          case AtomishString(x) => x
+          case x: AtomishCode   => (eval(universe)(x, ground) match {
+            case AtomishString(y)  => y
+            case AtomishInt(y)     => y.toString()
+            case AtomishDecimal(y) => y.toString()
+            case z                 => z.toString()
+          })
         }).mkString)
       }
       case AtomishNL           => AtomishNL

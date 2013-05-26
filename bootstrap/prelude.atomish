@@ -23,3 +23,10 @@ case = macro(
         eval(unquote(''(testorrec(`(cases at(0)), `(cases at(1)), `(cases dropLeft(2)))))),
         if(cases length ==(1),
           eval(cases at(0)))))))
+cond = macro(
+  if(arguments length >(0),
+    if(arguments length >(1),
+      if(eval(arguments at(0)), 
+        eval(arguments at(1)),
+        eval(unquote(''(cond(`*(arguments dropLeft(2))))))),
+      eval(arguments at(0)))))

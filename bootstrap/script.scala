@@ -76,7 +76,7 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
       )
       AtomishUnset
     }
-    case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+    case Array(AtomishMessage(variable), code) => {
       thing.asInstanceOf[AtomishArray].value.foreach(inner => {
           u.scopes = MMap(variable -> inner) +: u.scopes;
           u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))
@@ -92,7 +92,7 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
           u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message), Left(inner))))
       ))
     }
-    case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+    case Array(AtomishMessage(variable), code) => {
       AtomishArray(thing.asInstanceOf[AtomishArray].value.map(inner => {
           u.scopes = MMap(variable -> inner) +: u.scopes;
           var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))
@@ -109,7 +109,7 @@ AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishTh
             Left(inner)))).asInstanceOf[AtomishArray].value
       ))
     }
-    case Array(AtomishForm(List(AtomishMessage(variable))), code) => {
+    case Array(AtomishMessage(variable), code) => {
       AtomishArray(thing.asInstanceOf[AtomishArray].value.flatMap(inner => {
           u.scopes = MMap(variable -> inner) +: u.scopes;
           var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code)))).asInstanceOf[AtomishArray].value
