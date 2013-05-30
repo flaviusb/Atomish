@@ -37,6 +37,7 @@ object PreEvaller {
       case x                       => x
     }
     import scala.collection.mutable.Stack;
+    val operator_match: String = "^([~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+|…)$"
     def shuffle_limb(code: Stack[AtomishCode]): Stack[AtomishCode] = {
       // For now, we just rewrite bare '=' messages into ternary ie '(a s d x = y b c) → '(a s d =(x, y b c))
       // All other bare symbol message we rewrite into binary ie '(a + (b × c) - e ÷ f) → '(a +(b ×(c)) -(e ÷(f)))
@@ -58,8 +59,12 @@ object PreEvaller {
                 //println(PreScalaPrinter.print_with_forms(AtomishCall("=", Array(AtomishForm(code2.toList)))))
                 the_code = Stack()
               }
+            } else if (name.matches(operator_match)) {
+              // Shuffle binary operators
+              var code2 = shuffle_limb(the_code)
+              message_frag.push(AtomishCall(name, code2.toArray))
+              the_code = Stack()
             } else {
-              // For now, we only shuffle for the trinary case
               message_frag.push(AtomishMessage(name))
             }
           }

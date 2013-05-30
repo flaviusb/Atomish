@@ -93,7 +93,12 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with Ide
     "<"      -> AlienProxy(inttobool(a => value < a)),
     "<="     -> AlienProxy(inttobool(a => value <= a)),
     ">"      -> AlienProxy(inttobool(a => value > a)),
-    ">="     -> AlienProxy(inttobool(a => value >= a))
+    ">="     -> AlienProxy(inttobool(a => value >= a)),
+    "…"      -> AlienProxy(_.args match {
+      case List(Left(end: AtomishInt)) => {
+        AtomishOrigin(MMap[String, AtomishThing]("start" -> AtomishInt(value), "end" -> end))
+      }
+    })
   )
 }
 
@@ -262,7 +267,25 @@ case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing wit
       case List(Left(AtomishArray(app))) => AtomishArray(value ++ app)
     }),
     "at"        -> AlienProxy(_.args match {
-      case List(Left(AtomishInt(x))) => value(x)
+      case List(Left(AtomishInt(x)))    => value(x)
+      case List(Left(x: AtomishOrigin)) => {
+        // We assume x should follow the "Range" pseudo protocol
+        val start = (if(x.cells.isDefinedAt("start")) {
+          x.cells("start") match {
+            case AtomishInt(st_int) => (if(st_int >= 0) { st_int } else { value.length + st_int })
+          }
+        } else { 0 })
+        val end = (if(x.cells.isDefinedAt("end")) {
+          x.cells("end") match {
+            case AtomishInt(en_int) => (if(en_int >= 0) { en_int } else { value.length + en_int })
+          }
+        } else { 0 })
+        val reversed = (start > end)
+        val real_start = (if(!reversed) { start } else { end })
+        val real_end   = (if(reversed)  { start } else { end })
+        val new_value = value.slice(real_start, real_end + 1)
+        AtomishArray((if(reversed) { new_value.reverse } else { new_value }))
+      }
       case _                         => AtomishUnset
     }),
     "at="       -> AlienProxy(_.args match {
