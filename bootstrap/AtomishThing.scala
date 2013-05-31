@@ -346,7 +346,9 @@ case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing wi
 
 trait AtomishCode extends AtomishThing
 
-object AtomishNL extends AtomishThing with AtomishCode
+object AtomishNL extends AtomishThing with AtomishCode {
+  cells("name") = AtomishString(".")
+}
 
 // As in, the reader reads a string and outputs a form, the evaller evals a form...
 case class AtomishForm(things: List[AtomishCode]) extends AtomishThing with AtomishCode {
