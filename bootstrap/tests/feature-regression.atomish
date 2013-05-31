@@ -66,3 +66,9 @@ say(print(fooray [-1 … 2]))
 say(print(fooray [0 … -2]))
 say(print_with_forms('(say("foo bar foobaz" replace(/(f)(o)o/ , "$2$1"), "lol")) asArray [0] args [0]))
 say(print('(("foo bar foobaz" replace(/(f)(o)o/ , zog: "$2$1"))) asArray [0]))
+if("lolol" ~= /.*ol.*/,
+  say("<ol>lolol</ol>"),
+  say("Never were lists to be found in laughter, nor laughter made of lists."))
+if("lolol" ~= /.*toil.*/,
+  say(">.< o0(lolol)"),
+  say("We take joy in work, yes; but toil for its own sake is not found in happiness."))
