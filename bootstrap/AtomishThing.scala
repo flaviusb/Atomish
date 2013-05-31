@@ -225,6 +225,12 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
       case List(Left(AtomishString(x))) => AtomishBoolean(value != x)
       case _                            => AtomishBoolean(true)
     }),
+    "~="         -> AlienProxy(_.args match {
+      case List(Left(AtomishRegex(pattern, flags))) => {
+        var regex = new Pattern(pattern, flags.mkString)
+        AtomishBoolean(regex.matcher(value).matches())
+      }
+    }),
     "replace"    -> AlienProxy(_.args match {
       case List(Left(AtomishString(str_regex)), Left(AtomishString(replace))) => {
         var regex = new Pattern(Pattern.quote(str_regex))
@@ -323,11 +329,18 @@ case class AtomishMap(var value: MMap[AtomishThing, AtomishThing]) extends Atomi
   )
 }
 
-case class AtomishMessage(name: String) extends AtomishThing with AtomishCode
+case class AtomishMessage(name: String) extends AtomishThing with AtomishCode {
+  cells("name") = AtomishString(name)
+}
 
-case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode
+case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode {
+  cells("args") = AtomishArray(args.asInstanceOf[Array[AtomishThing]])
+}
 
-case class AtomishCall(name: String, args: Array[AtomishCode]) extends AtomishThing with AtomishCode
+case class AtomishCall(name: String, args: Array[AtomishCode]) extends AtomishThing with AtomishCode {
+  cells("name") = AtomishString(name)
+  cells("args") = AtomishArray(args.asInstanceOf[Array[AtomishThing]])
+}
 
 case class MessageChain(messages: Array[AtomishMessage]) extends AtomishThing with AtomishCode
 
@@ -336,7 +349,9 @@ trait AtomishCode extends AtomishThing
 object AtomishNL extends AtomishThing with AtomishCode
 
 // As in, the reader reads a string and outputs a form, the evaller evals a form...
-case class AtomishForm(things: List[AtomishCode]) extends AtomishThing with AtomishCode
+case class AtomishForm(things: List[AtomishCode]) extends AtomishThing with AtomishCode {
+  cells("args") = AtomishArray(things.toArray.asInstanceOf[Array[AtomishThing]])
+}
 
 case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (AtomishArgs => AtomishCode) {
   override def apply(args: AtomishArgs): AtomishCode = {

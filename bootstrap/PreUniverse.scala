@@ -189,7 +189,9 @@ class PreUniverse { self =>
       }
     }),
     "'"         -> QAlienProxy(ctd => {
-      AtomishCall("'", ctd.args)
+      var quoted = AtomishCall("'", ctd.args)
+      quoted.cells("asArray") = AlienProxy(_ => AtomishArray(ctd.args.asInstanceOf[Array[net.flaviusb.atomish.AtomishThing]]))
+      quoted
     }),
     "unquote"   -> AlienProxy(_.args match {
       case List(Left(AtomishCall("'", x))) => {
