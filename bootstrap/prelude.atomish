@@ -30,3 +30,5 @@ cond = macro(
         eval(arguments at(1)),
         eval(unquote(''(cond(`*(arguments dropLeft(2))))))),
       eval(arguments at(0)))))
+use = fn(file_name,
+  eval(read(FileSystem readFully(file_name))))

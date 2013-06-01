@@ -1,0 +1,6 @@
+FOO = 3
+BAR = Origin with(
+  quux: "Trebuchet",
+  qwwx: fn(x, "Trebwchet " + x)
+)
+say("feature-regression-external.atomish loaded.")
