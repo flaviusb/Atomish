@@ -102,5 +102,5 @@ object AtomishParser extends RegexParsers {
   def atomish_call: Parser[AtomishCall] = identifier ~ commated ^^ {
     case AtomishMessage(name) ~ AtomishCommated(args) => AtomishCall(name, args)
   }
-  def comment: Parser[AtomishComment] = ("""#[.][^.]*[.]""".r | "#;[^\\n\\r]*".r | "؟[^\\n\\r]*".r) ^^ { AtomishComment(_) }
+  def comment: Parser[AtomishComment] = ("""#[.][^.]*[.]""".r | "#;[^\\n\\r]*".r | "؟[^\\n\\r]*".r | "#!/[^\\n\\r]*".r) ^^ { AtomishComment(_) }
 }
