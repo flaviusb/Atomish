@@ -75,6 +75,37 @@ object PreAtomishInterpreter {
         case _                                    => AtomishUnset //Should soft error
       })
     ))
+    u.roots("Shell") = AtomishOrigin(MMap[String, AtomishThing](
+      "_out"              -> AlienProxy(_.args match {
+        case List(Left(AtomishCall("'", Array(_printer))), Left(AtomishCall("'", Array(_exit_status))), Left(AtomishString(pwd)), Left(stdin), Left(env), Left(AtomishArray(cmds))) => {
+          var printer     = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(_printer))))
+          var exit_status = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(_exit_status))))
+          var pb = new java.lang.ProcessBuilder(cmds.map(_ match { case AtomishString(x) => x }): _*)
+          pb.directory(new java.io.File(pwd))
+          pb.redirectErrorStream(true)
+          var proc = pb.start
+          var br = new java.io.BufferedReader(new java.io.InputStreamReader(proc.getInputStream))
+          var it: String = null
+          if(stdin != AtomishBoolean(false)) {
+            var stdinstream = new java.io.BufferedWriter(new java.io.OutputStreamWriter(proc.getOutputStream))
+            stdinstream write(stdin.asInstanceOf[AtomishString].value, 0, stdin.asInstanceOf[AtomishString].value.length)
+            stdinstream.flush
+            stdinstream.close
+          }
+          it = br.readLine;
+          while(it != null) {
+            printer match {
+              case x: AlienProxy  => x.activate(AtomishArgs(List(Left(AtomishString(it)))))
+              case x: QAlienProxy => x.activate(AtomishCommated(Array(AtomishString(it))))
+            }
+            it = br.readLine;
+          }
+          var exit_code = proc.waitFor;
+          exit_status.asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(AtomishInt(exit_code)))))
+        }
+        case x => { x.foreach(z => println(z.toString())) ; AtomishUnset }
+      })
+    ))
     AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishThing](
       ("Boolean", "==")      -> { thing => AlienProxy(booltobool(_ == thing.asInstanceOf[AtomishBoolean].value)) },
       ("Boolean", "and")     -> { thing => AlienProxy(booltobool(_ && thing.asInstanceOf[AtomishBoolean].value)) },
