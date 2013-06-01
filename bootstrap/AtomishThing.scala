@@ -312,7 +312,18 @@ case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing wit
       case AtomishInt(x)     => x.toString()
       case AtomishDecimal(x) => x.toString()
       case x                 => x.toString()
-    }).mkString))
+    }).mkString)),
+    "pop!"      -> AlienProxy(_ => {
+      var ret = value(0)
+      value = value.drop(1)
+      ret
+    }),
+    "push!"     -> AlienProxy(_.args match {
+      case List(Left(x)) => {
+        value = x +: value
+        AtomishUnset
+      }
+    })
   )
 }
 
