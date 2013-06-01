@@ -341,6 +341,7 @@ case class AtomishMessage(name: String) extends AtomishThing with AtomishCode {
 }
 
 case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode {
+  cells("name") = AtomishString("")
   cells("args") = AtomishArray(args.asInstanceOf[Array[AtomishThing]])
 }
 
