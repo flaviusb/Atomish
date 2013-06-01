@@ -305,7 +305,14 @@ case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing wit
     }),
     "dropRight" -> AlienProxy(_.args match {
       case List(Left(AtomishInt(to_drop))) => AtomishArray(value.dropRight(to_drop))
-    })
+    }),
+    "reverse"   -> AlienProxy(_ => AtomishArray(value.reverse)),
+    "join"      -> AlienProxy(_ => AtomishString(value.map(_ match {
+      case AtomishString(x)  => x
+      case AtomishInt(x)     => x.toString()
+      case AtomishDecimal(x) => x.toString()
+      case x                 => x.toString()
+    }).mkString))
   )
 }
 

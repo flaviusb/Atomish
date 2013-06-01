@@ -72,3 +72,4 @@ if("lolol" ~= /.*ol.*/,
 if("lolol" ~= /.*toil.*/,
   say(">.< o0(lolol)"),
   say("We take joy in work, yes; but toil for its own sake is not found in happiness."))
+say(Array(1, 2, 3, 4, 56) reverse join)
