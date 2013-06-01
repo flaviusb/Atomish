@@ -6,6 +6,7 @@ say(print(/foo "bar"* \/baz\//asxm))
 say("foo bar foobaz" replace(/(f)(o)o/ , "$2$1"))
 say("foo bar foobaz" replaceAll(/(f)(o)o/ , "$2$1"))
 say(FileSystem withOpenFile("a", fn(x, x put(3.333). 3)))
+say(FileSystem readFully("a"))
 say(print(Origin mimic))
 setCell("doctype", fn(extension,
   say(extension)

@@ -65,6 +65,14 @@ object PreAtomishInterpreter {
           writer.close()
           ret
         }
+      }),
+      "readFully"        -> AlienProxy(_.args match {
+        case List(Left(AtomishString(file_name))) => {
+          var file_source = new BufferedSource(new FileInputStream(new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value,
+            file_name)))
+          AtomishString(file_source.addString(new StringBuilder(1024)).toString())
+        }
+        case _                                    => AtomishUnset //Should soft error
       })
     ))
     AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishThing](
