@@ -1,0 +1,53 @@
+#!/bin/bash
+#scala -classpath ".:./vendor" net.flaviusb.atomish.PreAtomishInterpreter "$@"
+
+# -----------------------------------------------------------------------------
+# preatomish - Start Script for the PreAtomish interpreter
+#
+# original script totally stolen from Ioke, which stole it from JRuby
+#
+# Environment Variable Prequisites
+#
+#   JAVA_HOME     Must point at your Java Development Kit installation.
+#
+# -----------------------------------------------------------------------------
+
+# ----- Verify and Set Required Environment Variables -------------------------
+
+## resolve links - $0 may be a link to  home
+PRG=$0
+progname=`basename "$0"`
+
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG="`dirname $PRG`/$link"
+  fi
+done
+
+PREATOMISH_HOME_1=`dirname "$PRG"`           # the ./bootstrap dir
+
+if [ "${PREATOMISH_HOME_1}" = "." ]; then
+    PREATOMISH_HOME_1=`pwd`
+fi
+
+PREATOMISH_HOME=`dirname "$PREATOMISH_HOME_1"`  # the . dir
+
+# ----- Set Up The Boot Classpath -------------------------------------------
+
+CP_DELIMETER=":"
+
+PREATOMISH_CP="$PREATOMISH_HOME$CP_DELIMETER$PREATOMISH_HOME/vendor$CP_DELIMETER$CLASSPATH"
+## add preatomish classes for command-line execution - when we start using jars
+#for j in "$PREATOMISH_HOME"/lib/preatomish*.jar; do
+#    if [ "$PREATOMISH_CP" ]; then
+#        PREATOMISH_CP="$PREATOMISH_CP$CP_DELIMETER$j"
+#        else
+#        PREATOMISH_CP="$j"
+#    fi
+#done
+
+scala -classpath "$PREATOMISH_CP" "-Datomish.lib=$PREATOMISH_HOME" net.flaviusb.atomish.PreAtomishInterpreter "$@"

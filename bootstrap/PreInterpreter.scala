@@ -172,8 +172,8 @@ object PreAtomishInterpreter {
         }
       }) }
     )
-
-    var prelude_source = new BufferedSource(new FileInputStream(new File("./prelude.atomish")))
+    var libs_dir: String = System.getProperty("atomish.lib", ".")
+    var prelude_source = new BufferedSource(new FileInputStream(new File(libs_dir, "prelude.atomish")))
     var prelude = AtomishString(prelude_source.addString(new StringBuilder(1024)).toString())
     e(r.read(prelude), None)
     var stream_source = new BufferedSource(new FileInputStream(file_source))

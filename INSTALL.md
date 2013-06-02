@@ -10,5 +10,5 @@ Then from the project root:
     cd bootstrap
     ./mk.sh
 
-The preinterpreter can be invoked through a shellscript found at `bootstrap/preatomish.sh`
+The preinterpreter can be invoked through a shellscript found at `bootstrap/bin/preatomish`
 

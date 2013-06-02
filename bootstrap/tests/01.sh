@@ -1,6 +1,4 @@
 #!/bin/bash
 
-cd ..
-./preatomish.sh "`pwd`/tests/simple-regression.atomish" > tests/simple-regression.1
-cd -
+../bin/preatomish "`pwd`/simple-regression.atomish" > simple-regression.1
 diff simple-regression.1 simple-regression.2
