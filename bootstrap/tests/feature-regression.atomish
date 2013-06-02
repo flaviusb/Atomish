@@ -48,7 +48,8 @@ euuer = fn(a, +b,
 euuer(1)
 euuer(1, 2, 3, r: 4, q: 5)
 l = Array(1, 2, 3)
-say(print_with_forms(read("unquote(''(foo(1, 2, `*(l), 7, 8)))")))
+say(print_with_forms(
+  read("unquote(''(foo(1, 2, `*(l), 7, 8)))")))
 say(print(unquote(''(foo(1, 2, `*(l), 7, 8)))))
 zog = fn(q, w, e,
   cond(
@@ -79,6 +80,8 @@ flob push!(33)
 say(flob pop!() +(flob pop!()))
 say(print(flob))
 use("feature-regression-external.atomish")
+
+
 say(FOO +(1) asText)
 say(BAR quux)
 say(BAR qwwx(BAR quux))

@@ -79,10 +79,8 @@ object AtomishParser extends RegexParsers {
   def identifier: Parser[AtomishMessage] = ("[_+:]*[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+".r | "[]"
     | "{}" | "…") ^^ { AtomishMessage(_) }
   def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | identifier | nll) // This will eventually be a big union of all types that can constitute standalone code
-  def code_bit: Parser[List[AtomishCode]] = (((nll ~ code_tiny_bit) | nll | (wss ~ code_tiny_bit))*) ^^ { _.flatMap { 
-    case "" ~ (code_piece: AtomishCode)        => List(code_piece)
-    case AtomishNL ~ (code_piece: AtomishCode) => List(AtomishNL, code_piece)
-    case AtomishNL                             => List(AtomishNL)
+  def code_bit: Parser[List[AtomishCode]] = (((wss*) ~ code_tiny_bit)*) ^^ { _.flatMap { 
+    case x ~ (code_piece: AtomishCode)         => List(code_piece)
   } }
   def code: Parser[AtomishCode] = code_tiny_bit ~ code_bit ^^ {
     case a ~ b => {
