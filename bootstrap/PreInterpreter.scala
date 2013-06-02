@@ -38,41 +38,47 @@ object PreAtomishInterpreter {
       "cwd"              -> AtomishString(file_source.getAbsoluteFile().getParent()),
       "exists?"          -> AlienProxy(_.args match {
         case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).exists)
+        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishBoolean((new File(file_base, file_name)).exists)
         case _                                    => AtomishUnset //Should soft error
       }),
       "removeFile!"      -> AlienProxy(_.args match {
         case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).delete())
+        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishBoolean((new File(file_base, file_name)).delete())
       }),
       "parentOf"         -> AlienProxy(_.args match {
         case List(Left(AtomishString(file_name))) => AtomishString((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).getParent())
+        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishString((new File(file_base, file_name)).getParent())
       }),
-      "withOpenFile"     -> AlienProxy(_.args match {
-        case List(Left(AtomishString(file_name)), Left(lexical_thingy)) => {
-          var io_file = new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)
-          var writer = new FileWriter(io_file);
-          var io = AtomishOrigin(MMap[String, AtomishThing](
-            "put"   -> AlienProxy(_.args match {
-              case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
-            }),
-            "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
-          ))
-          var ret = lexical_thingy match {
-            case q: AlienProxy  => q.activate(AtomishArgs(List(Left(io))))
-            case q: QAlienProxy => q.activate(AtomishCommated(Array(io)))
-          }
-          //io.cells("flush").asInstanceOf[AlienProxy].activate(AtomishArgs(List()))
-          writer.flush()
-          writer.close()
-          ret
+      "withOpenFile"     -> AlienProxy(x => {
+        var(file_base, file_name, lexical_thingy) = x.args match {
+          case List(Left(AtomishString(file_name)), Left(lexical_thingy)) => (u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name, lexical_thingy)
+          case List(Left(AtomishString(file_base)), Left(AtomishString(file_name)), Left(lexical_thingy)) => (file_base, file_name, lexical_thingy)
         }
+        var io_file = new File(file_base, file_name)
+        var writer = new FileWriter(io_file);
+        var io = AtomishOrigin(MMap[String, AtomishThing](
+          "put"   -> AlienProxy(_.args match {
+            case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
+          }),
+          "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
+        ))
+        var ret = lexical_thingy match {
+          case q: AlienProxy  => q.activate(AtomishArgs(List(Left(io))))
+          case q: QAlienProxy => q.activate(AtomishCommated(Array(io)))
+        }
+        //io.cells("flush").asInstanceOf[AlienProxy].activate(AtomishArgs(List()))
+        writer.flush()
+        writer.close()
+        ret
       }),
-      "readFully"        -> AlienProxy(_.args match {
-        case List(Left(AtomishString(file_name))) => {
-          var file_source = new BufferedSource(new FileInputStream(new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value,
-            file_name)))
-          AtomishString(file_source.addString(new StringBuilder(1024)).toString())
-        }
-        case _                                    => AtomishUnset //Should soft error
+    "readFully"        -> AlienProxy(x => {
+      var (file_base, file_name) = x.args match {
+        case List(Left(AtomishString(file_name))) => (u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)
+        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => (file_base, file_name)
+      }
+      var file_source = new BufferedSource(new FileInputStream(new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value,
+        file_name)))
+      AtomishString(file_source.addString(new StringBuilder(1024)).toString())
       })
     ))
     u.roots("Shell") = AtomishOrigin(MMap[String, AtomishThing](
