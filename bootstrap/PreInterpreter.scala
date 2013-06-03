@@ -172,6 +172,41 @@ object PreAtomishInterpreter {
           }))
         }
       }) },
+      ("Array", "filter")       -> { thing => QAlienProxy(_.args match {
+        case Array() => {
+          AtomishArray(thing.asInstanceOf[AtomishArray].value.filter(x => x != AtomishUnset))
+        }
+        case Array(message) => {
+          AtomishArray(thing.asInstanceOf[AtomishArray].value.filter(inner => {
+              var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message),
+                Left(inner))))
+              if(ret.isInstanceOf[AtomishBoolean]) {
+                ret.asInstanceOf[AtomishBoolean].value
+              } else {
+                ((ret.cells.isDefinedAt("isTruthy") &&
+                 (u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ret.cells("isTruthy"))))) == AtomishBoolean(true))) ||
+                 (ret.cells.isDefinedAt("asBool") &&
+                 (u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ret.cells("asBool"))))) == AtomishBoolean(true))))
+              }
+          }))
+        }
+        case Array(AtomishMessage(variable), code) => {
+          AtomishArray(thing.asInstanceOf[AtomishArray].value.filter(inner => {
+              u.scopes = MMap(variable -> inner) +: u.scopes;
+              var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))))
+              var sco = u.scopes.tail;
+              u.scopes = sco
+              if(ret.isInstanceOf[AtomishBoolean]) {
+                ret.asInstanceOf[AtomishBoolean].value
+              } else {
+                ((ret.cells.isDefinedAt("isTruthy") &&
+                 (u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ret.cells("isTruthy"))))) == AtomishBoolean(true))) ||
+                 (ret.cells.isDefinedAt("asBool") &&
+                 (u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ret.cells("asBool"))))) == AtomishBoolean(true))))
+              }
+          }))
+        }
+      }) },
       ("Origin", "=")        -> { thing => QAlienProxy(_.args match {
         case Array(AtomishMessage(cell_name), x) => {
           var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
