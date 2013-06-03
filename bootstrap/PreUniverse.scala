@@ -58,13 +58,25 @@ class PreUniverse { self =>
         AtomishUnset
       } else {
         var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(0)))))
-        if (test == AtomishBoolean(true)) {
+        if (
+          (test == AtomishBoolean(true)) ||
+          (test.cells.isDefinedAt("isTruthy") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isTruthy"))))) == AtomishBoolean(true))) ||
+          (test.cells.isDefinedAt("asBool") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(true)))
+          ) {
           if(ctd.args.length >= 2) {
             self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))))
           } else {
             AtomishUnset
           }
-        } else if((test == AtomishBoolean(false)) && (ctd.args.length >= 3)) {
+        } else if((ctd.args.length >= 3) && (
+          (test == AtomishBoolean(false)) ||
+          (test.cells.isDefinedAt("isFalsy") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isFalsy"))))) == AtomishBoolean(true))) ||
+          (test.cells.isDefinedAt("asBool") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(false)))
+        )) {
           self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))))
         } else {
           AtomishUnset

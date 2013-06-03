@@ -77,6 +77,8 @@ if("lolol" ~= /.*ol.*/,
 if("lolol" ~= /.*toil.*/,
   say(">.< o0(lolol)"),
   say("We take joy in work, yes; but toil for its own sake is not found in happiness."))
+let(what, "trololo" ~= /({wololo}[^o]*)..({lo}..)./,
+  say(what ["wololo"] +(what ["lo"]) +(what [0] [3])))
 say(Array(1, 2, 3, 4, 56) reverse join)
 flob = Array(3, 4, 5, 6)
 flob push!(33)

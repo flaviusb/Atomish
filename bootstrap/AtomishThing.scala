@@ -1,6 +1,7 @@
 package net.flaviusb.atomish
 
 import scala.language.experimental.macros
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{Map => MMap}
 
 import org.jregex.{Pattern, Replacer}
@@ -228,7 +229,30 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
     "~="         -> AlienProxy(_.args match {
       case List(Left(AtomishRegex(pattern, flags))) => {
         var regex = new Pattern(pattern, flags.mkString)
-        AtomishBoolean(regex.matcher(value).matches())
+        var matcher = regex.matcher(value)
+        AtomishOrigin(MMap[String, AtomishThing](
+          "isTruthy" -> AtomishBoolean(matcher.matches()),
+          "isFalsy"  -> AtomishBoolean(!matcher.matches()),
+          "names"    -> AtomishArray(regex.getGroupNames().toArray.map(x => AtomishString(x.asInstanceOf[String]))),
+          "asBool"   -> AtomishBoolean(matcher.matches()),
+          "at"       -> AlienProxy(_.args match {
+            case List(Left(AtomishInt(group_number))) => {
+              if((group_number < matcher.groupCount()) && (matcher.isCaptured(group_number))) {
+                AtomishString(matcher.group(group_number))
+              } else {
+                AtomishUnset
+              }
+            }
+            case List(Left(AtomishString(group_name))) => {
+              var group_id: Integer = regex.groupId(group_name)
+              if((group_id != null) && matcher.isCaptured(group_id)) {
+                AtomishString(matcher.group(group_id))
+              } else {
+                AtomishUnset
+              }
+            }
+          })
+        ))
       }
     }),
     "replace"    -> AlienProxy(_.args match {

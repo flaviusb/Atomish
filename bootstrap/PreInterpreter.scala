@@ -113,14 +113,16 @@ object PreAtomishInterpreter {
       })
     ))
     AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishThing](
-      ("Boolean", "==")      -> { thing => AlienProxy(booltobool(_ == thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "and")     -> { thing => AlienProxy(booltobool(_ && thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "or")      -> { thing => AlienProxy(booltobool(_ || thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "not")     -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "isTrue")  -> { thing => AlienProxy(a => AtomishBoolean(thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "isFalse") -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
-      ("Boolean", "asText")  -> { thing => AlienProxy(a => AtomishString(thing.asInstanceOf[AtomishBoolean].value.toString())) },
-      ("Array", "each")      -> { thing => QAlienProxy(_.args match {
+      ("Boolean", "==")       -> { thing => AlienProxy(booltobool(_ == thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "and")      -> { thing => AlienProxy(booltobool(_ && thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "or")       -> { thing => AlienProxy(booltobool(_ || thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "not")      -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "isTrue")   -> { thing => AlienProxy(a => AtomishBoolean(thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "isTruthy") -> { thing => AlienProxy(a => AtomishBoolean(thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "isFalse")  -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "isFalsy")  -> { thing => AlienProxy(a => AtomishBoolean(!thing.asInstanceOf[AtomishBoolean].value)) },
+      ("Boolean", "asText")   -> { thing => AlienProxy(a => AtomishString(thing.asInstanceOf[AtomishBoolean].value.toString())) },
+      ("Array", "each")       -> { thing => QAlienProxy(_.args match {
         case Array(message) => {
           thing.asInstanceOf[AtomishArray].value.foreach(inner =>
               u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(message), Left(inner))))
