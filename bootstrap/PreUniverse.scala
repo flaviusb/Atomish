@@ -57,7 +57,19 @@ class PreUniverse { self =>
       if(ctd.args.length == 0) {
         AtomishUnset
       } else {
-        var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(0)))))
+        var real_arg_zero = ctd.args(0)
+        var it_name: Option[String] = (ctd.args(0) match {
+          case AtomishForm(List(AtomishMessage(maybe_name), x @_*)) => {
+            if(maybe_name.endsWith(":")) {
+              real_arg_zero = AtomishForm(x.toList)
+              Some(maybe_name.substring(0, maybe_name.length - 1))
+            } else {
+              None
+            }
+          }
+          case _                                                    => None
+        })
+        var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(real_arg_zero))))
         if (
           (test == AtomishBoolean(true)) ||
           (test.cells.isDefinedAt("isTruthy") &&
@@ -66,7 +78,15 @@ class PreUniverse { self =>
             (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(true)))
           ) {
           if(ctd.args.length >= 2) {
-            self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))))
+            for(name <- it_name) {
+              scopes = MMap(name -> test) +: scopes;
+            }
+            var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))));
+            if (it_name != None) {
+              var sco = scopes.tail;
+              scopes = sco;
+            }
+            result
           } else {
             AtomishUnset
           }
@@ -77,7 +97,15 @@ class PreUniverse { self =>
           (test.cells.isDefinedAt("asBool") &&
             (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(false)))
         )) {
-          self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))))
+          for(name <- it_name) {
+            scopes = MMap(name -> test) +: scopes;
+          }
+          var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))));
+          if (it_name != None) {
+            var sco = scopes.tail;
+            scopes = sco;
+          }
+          result
         } else {
           AtomishUnset
         }
