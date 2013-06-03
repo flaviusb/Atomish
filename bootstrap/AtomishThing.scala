@@ -71,6 +71,8 @@ object AtomishThing {
 
 object AtomishUnset extends AtomishThing {
   pre_type = "Unset"
+  cells("isTruthy") = AtomishBoolean(false)
+  cells("isFalsy")  = AtomishBoolean(true)
 }
 
 case class AtomishBoolean(value: Boolean) extends AtomishThing with AtomishCode with IdempotentEval {
