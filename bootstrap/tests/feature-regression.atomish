@@ -80,6 +80,7 @@ if("lolol" ~= /.*toil.*/,
 if(what: "trololo" ~= /({wololo}[^o]*)..({lo}..)./,
   say(what ["wololo"] +(what ["lo"]) +(what [0] [3])))
 say(Array(1, 2, 3, 4, 56) reverse join)
+say("[#{Array(1, 2, 3, 4, 56) reverse join(", ")}]")
 flob = Array(3, 4, 5, 6)
 flob push!(33)
 say(flob pop!() +(flob pop!()))
