@@ -214,7 +214,28 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
   cells ++= MMap[String, AtomishThing](
     "length"     -> AlienProxy(nonetoint(value.length)),
     "+"          -> AlienProxy(strtostr(value + _)),
-    "at"         -> AlienProxy(inttostr(x => value.substring(x, x + 1))),
+    "at"         -> AlienProxy(_.args match {
+      case List(Left(AtomishInt(x)))    => AtomishString(value.substring(x, x+1))
+      case List(Left(x: AtomishOrigin)) => {
+        // We assume x should follow the "Range" pseudo protocol
+        val start = (if(x.cells.isDefinedAt("start")) {
+          x.cells("start") match {
+            case AtomishInt(st_int) => (if(st_int >= 0) { st_int } else { value.length + st_int })
+          }
+        } else { 0 })
+        val end = (if(x.cells.isDefinedAt("end")) {
+          x.cells("end") match {
+            case AtomishInt(en_int) => (if(en_int >= 0) { en_int } else { value.length + en_int })
+          }
+        } else { 0 })
+        val reversed = (start > end)
+        val real_start = (if(!reversed) { start } else { end })
+        val real_end   = (if(reversed)  { start } else { end })
+        val new_value: String = value.substring(real_start, real_end + 1)
+        AtomishString(if(reversed) { new_value.reverse } else { new_value })
+      }
+      case _                         => AtomishUnset
+    }),
     "substring"  -> AlienProxy(intinttostr((x, y) => value.substring(x, y))),
     "asText"     -> AlienProxy(_.args match {
       case List() => AtomishString(value)
