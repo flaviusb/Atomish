@@ -381,6 +381,7 @@ case class AtomishMap(var value: MMap[AtomishThing, AtomishThing]) extends Atomi
 
 case class AtomishMessage(name: String) extends AtomishThing with AtomishCode {
   cells("name") = AtomishString(name)
+  cells("args") = AtomishArray(Array())
 }
 
 case class AtomishCommated(args: Array[AtomishCode]) extends AtomishThing with AtomishCode {
