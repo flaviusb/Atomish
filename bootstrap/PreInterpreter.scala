@@ -58,6 +58,7 @@ object PreAtomishInterpreter {
         var writer = new FileWriter(io_file);
         var io = AtomishOrigin(MMap[String, AtomishThing](
           "put"   -> AlienProxy(_.args match {
+            case List(Left(AtomishString(x))) => { writer.write(x); AtomishUnset }
             case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
           }),
           "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
