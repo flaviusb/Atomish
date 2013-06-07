@@ -4,10 +4,10 @@ import scala.collection.mutable.{Map => MMap}
 
 object PreScalaMirror {
   // This mirror only works on quote protected arguments.
-  val mirror = Origin(with(MMap[String, AtomishThing](
+  val mirror = AtomishOrigin(MMap[String, AtomishThing](
     "idempotent?" -> QAlienProxy(_.args match {
-      case AtomishCall("'", Array(x: IdempotentEval)) => AtomishBoolean(true)
-      case _                                          => AtomishBoolean(false)
+      case Array(AtomishCall("'", Array(x: IdempotentEval))) => AtomishBoolean(true)
+      case _                                                 => AtomishBoolean(false)
     }),
     "cells"       -> QAlienProxy(ctd => { AtomishUnset }),
     "code?"       -> QAlienProxy(ctd => { AtomishUnset }),
@@ -15,5 +15,5 @@ object PreScalaMirror {
     "message?"    -> QAlienProxy(ctd => { AtomishUnset }),
     "pre_type"    -> QAlienProxy(ctd => { AtomishUnset }),
     "≡"           -> QAlienProxy(ctd => { AtomishUnset })
-  )))
+  ))
 }

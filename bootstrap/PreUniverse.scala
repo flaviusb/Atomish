@@ -325,6 +325,9 @@ class PreUniverse { self =>
       case _             => MMap[AtomishThing, AtomishThing]()
     }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _))),
     "Origin"    -> AtomishOrigin(),
+    "Mirror"    -> AtomishMap(MMap[AtomishThing, AtomishThing](
+      AtomishString("pre_scala_mirror") -> PreScalaMirror.mirror
+    )),
     "nil"       -> AtomishUnset,
     "primfn"    -> AlienProxy(_.args match {
       case List(Left(AtomishString(str))) => {
