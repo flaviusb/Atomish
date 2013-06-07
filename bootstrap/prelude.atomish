@@ -4,7 +4,7 @@ unless = macro(
       if(arguments length >(1),
         if(the_it,
           eval(arguments at(1)),
-          if(arguments length >=(2),
+          if(arguments length >(2),
             eval(arguments at(2))))))))
 case = macro(
   if(arguments length >(0),
