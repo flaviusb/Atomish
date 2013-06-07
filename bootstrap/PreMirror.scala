@@ -9,10 +9,17 @@ object PreScalaMirror {
       case Array(AtomishCall("'", Array(x: IdempotentEval))) => AtomishBoolean(true)
       case _                                                 => AtomishBoolean(false)
     }),
+    "message?"    -> QAlienProxy(_.args match {
+      case Array(AtomishCall("'", Array(x: AtomishMessage))) => AtomishBoolean(true)
+      case _                                                 => AtomishBoolean(false)
+    }),
+    "dot?"        -> QAlienProxy(_.args match {
+      case Array(AtomishCall("'", Array(AtomishNL))) => AtomishBoolean(true)
+      case _                                         => AtomishBoolean(false)
+    }),
     "cells"       -> QAlienProxy(ctd => { AtomishUnset }),
     "code?"       -> QAlienProxy(ctd => { AtomishUnset }),
     "origin?"     -> QAlienProxy(ctd => { AtomishUnset }),
-    "message?"    -> QAlienProxy(ctd => { AtomishUnset }),
     "pre_type"    -> QAlienProxy(ctd => { AtomishUnset }),
     "≡"           -> QAlienProxy(ctd => { AtomishUnset })
   ))
