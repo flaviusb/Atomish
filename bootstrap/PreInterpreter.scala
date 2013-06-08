@@ -144,6 +144,7 @@ object PreAtomishInterpreter {
         case x => { x.foreach(z => println(z.toString())) ; AtomishUnset }
       })
     ))
+
     AtomishThing.post_bootstrap ++= MMap[(String, String), AtomishThing => AtomishThing](
       ("Boolean", "==")       -> { thing => AlienProxy(booltobool(_ == thing.asInstanceOf[AtomishBoolean].value)) },
       ("Boolean", "and")      -> { thing => AlienProxy(booltobool(_ && thing.asInstanceOf[AtomishBoolean].value)) },
@@ -244,6 +245,15 @@ object PreAtomishInterpreter {
           var ret = u.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
           thing.cells(cell_name) = ret
           ret
+        }
+      }) },
+      ("Origin", "⇒")         -> { thing => AlienProxy(_.args match {
+        case List(Left(key), Left(value)) => {
+          AtomishOrigin(MMap[String, AtomishThing](
+            "key"   -> key,
+            "value" -> value,
+            "pair?" -> AtomishBoolean(true)
+          ))
         }
       }) }
     )

@@ -336,6 +336,15 @@ class PreUniverse { self =>
       }
       case _                              => null //boom
     }),
+    "⇒"         -> AlienProxy(_.args match {
+      case List(Left(key), Left(value)) => {
+        AtomishOrigin(MMap[String, AtomishThing](
+            "key"   -> key,
+            "value" -> value,
+            "pair?" -> AtomishBoolean(true)
+        ))
+      }
+    }),
     "="         -> QAlienProxy(ctd => ctd.args match {
       case Array(AtomishMessage(cell_name), x) => {
         var ret = roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))

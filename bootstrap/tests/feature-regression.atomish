@@ -115,3 +115,7 @@ velkdjfhvl . . .) asArray [0] args each(f,
   say("Dot: #{eval(unquote(''(mirror dot?(`(''(`(f))))))) asText}"))
 let(wrgreg, 54,
   say(eval(read("wrgreg")) asText))
+
+say(("foo" ⇒ "bar") key)
+say(("foo" ⇒ "bar") value)
+say(("foo" ⇒ "bar") pair? asText)

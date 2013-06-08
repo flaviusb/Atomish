@@ -38,6 +38,7 @@ object PreEvaller {
     }
     import scala.collection.mutable.Stack;
     val operator_match: String = "^([~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+|…)$"
+    val infix = Set("⇒", "=") // TODO: Move this into the MOP inside the Universe
     def shuffle_limb(code: Stack[AtomishCode]): Stack[AtomishCode] = {
       // For now, we just rewrite bare '=' messages into ternary ie '(a s d x = y b c) → '(a s d =(x, y b c))
       // All other bare symbol message we rewrite into binary ie '(a + (b × c) - e ÷ f) → '(a +(b ×(c)) -(e ÷(f)))
@@ -47,15 +48,15 @@ object PreEvaller {
         var code_bit = the_code.pop;
         code_bit match {
           case AtomishMessage(name) => {
-            // First we deal with the trinary case
-            if(name == "=") {
+            // First we deal with the 'trinary' case
+            if(infix.contains(name)) {
               // There must be something on the lhs
               if(message_frag.length == 0) {
                 null // Should error
               } else {
                 var lhs = message_frag.pop;
                 var code2 = shuffle_limb(the_code)
-                message_frag.push(AtomishCall("=", Array(lhs, AtomishForm(code2.toList))))
+                message_frag.push(AtomishCall(name, Array(lhs, AtomishForm(code2.toList))))
                 //println(PreScalaPrinter.print_with_forms(AtomishCall("=", Array(AtomishForm(code2.toList)))))
                 the_code = Stack()
               }
