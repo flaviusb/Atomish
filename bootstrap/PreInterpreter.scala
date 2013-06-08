@@ -39,6 +39,7 @@ object PreAtomishInterpreter {
         case Right((name, value)) => outargs(name) = value
       })
       val keys = outargs.keySet
+      positional = positional.reverse
       names.filter(x => !keys.contains(x)).zip(positional).foreach(kv => outargs(kv._1) = kv._2)
       outargs
     }
@@ -46,24 +47,27 @@ object PreAtomishInterpreter {
     val file_args = arg_getterer(thing) _;
     def get_file(file_bits: MMap[String, AtomishThing]): File = {
       (if(file_bits.isDefinedAt("absolute_path")) {
-          new File(file_bits("absolute_path").asInstanceOf[AtomishString].value).getAbsoluteFile()
+          new File(file_bits("absolute_path").asInstanceOf[AtomishString].value).getCanonicalFile()
         } else if(file_bits.isDefinedAt("relative_path")) {
-          new File(file_bits("relative_path").asInstanceOf[AtomishString].value).getAbsoluteFile()
+          new File(file_bits("relative_path").asInstanceOf[AtomishString].value).getCanonicalFile()
         } else if(file_bits.isDefinedAt("file_base")) {
           (if(file_bits.isDefinedAt("file_name")) {
-            new File(file_bits("file_base").asInstanceOf[AtomishString].value, file_bits("file_name").asInstanceOf[AtomishString].value).getAbsoluteFile()
+            new File(file_bits("file_base").asInstanceOf[AtomishString].value,
+              file_bits("file_name").asInstanceOf[AtomishString].value).getCanonicalFile()
           } else {
-            new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_bits("file_base").asInstanceOf[AtomishString].value).getAbsoluteFile()
+            new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value,
+              file_bits("file_base").asInstanceOf[AtomishString].value).getCanonicalFile()
           })
         } else {
-          null // Should error here
-      })
+          // We assume you want the cwd
+          new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value).getCanonicalFile()
+        })
     }
     u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
       "programArguments" -> AtomishArray(args.drop(1).map(x => AtomishString(x)))
     ))
     u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
-      "cwd"              -> AtomishString(file_source.getAbsoluteFile().getParent()),
+      "cwd"              -> AtomishString(file_source.getCanonicalFile().getParentFile().getCanonicalPath()),
       "exists?"          -> AlienProxy(base_args => {
         val file_bits = file_args(base_args)
         AtomishBoolean(get_file(file_bits).exists)
@@ -74,7 +78,7 @@ object PreAtomishInterpreter {
       }),
       "parentOf"         -> AlienProxy(base_args => {
         val file_bits = file_args(base_args)
-        AtomishString(get_file(file_bits).getParent())
+        AtomishString(get_file(file_bits).getParentFile().getCanonicalPath())
       }),
       "withOpenFile"     -> AlienProxy(x => {
         var(file_base, file_name, lexical_thingy) = x.args match {
