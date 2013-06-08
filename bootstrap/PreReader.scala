@@ -24,6 +24,12 @@ object AtomishParser extends RegexParsers {
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
   def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
+  // In the actual AtomishLanguage, flagcheck should be implemented as a reader macro
+  def flagcheck = "#" ~ "[_+:]*[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r ^^ {
+    case "#" ~ flagName => {
+      AtomishCall("flag", Array(AtomishString(flagName)))
+    }
+  }
   def regex_escapes = ("""\/""" | """\\""" | """\n""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
@@ -78,7 +84,8 @@ object AtomishParser extends RegexParsers {
   def string = (sstring | qstring)
   def identifier: Parser[AtomishMessage] = ("[_+:]*[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+".r | "[]"
     | "{}" | "…") ^^ { AtomishMessage(_) }
-  def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | identifier | nll) // This will eventually be a big union of all types that can constitute standalone code
+  def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | identifier
+    | flagcheck | nll) // This will eventually be a big union of all types that can constitute standalone code
   def code_bit: Parser[List[AtomishCode]] = (((wss*) ~ code_tiny_bit)*) ^^ { _.flatMap { 
     case x ~ (code_piece: AtomishCode)         => List(code_piece)
   } }

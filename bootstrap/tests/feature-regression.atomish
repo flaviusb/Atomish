@@ -119,3 +119,5 @@ let(wrgreg, 54,
 say(("foo" ⇒ "bar") key)
 say(("foo" ⇒ "bar") value)
 say(("foo" ⇒ "bar") pair? asText)
+say(("foo" ⇒ "bar") #pair? asText)
+say(("foo" +("bar")) #pair? asText)

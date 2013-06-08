@@ -65,6 +65,19 @@ object AtomishThing {
         value
       }
     }) },
+    "flag"        -> { thing => AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => {
+        if(thing.cells.isDefinedAt(x)) {
+          AtomishBoolean(thing.cells(x) == AtomishBoolean(true))
+        } else if(AtomishThing.post_bootstrap.isDefinedAt((thing.pre_type, x))) {
+          AtomishBoolean(AtomishThing.post_bootstrap((thing.pre_type, x))(thing) == AtomishBoolean(true))
+        } else if(AtomishThing.bootstrap_cells.isDefinedAt(x)) {
+          AtomishBoolean(AtomishThing.bootstrap_cells(x)(thing) == AtomishBoolean(true))
+        } else {
+          AtomishBoolean(false)
+        }
+      }
+    }) },
     "activatable" -> { thing => AtomishBoolean(false) }
   )
 }
