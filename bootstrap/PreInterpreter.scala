@@ -3,7 +3,7 @@ package net.flaviusb.atomish
 import java.io.{File, FileInputStream, Writer, Reader, BufferedReader, StringReader, IOException, FileReader, FileWriter}
 import scala.io.{BufferedSource}
 
-import scala.collection.mutable.{Map => MMap}
+import scala.collection.mutable.{Map => MMap, Stack}
 
 object PreAtomishInterpreter {
   var u = new PreUniverse()
@@ -31,23 +31,50 @@ object PreAtomishInterpreter {
     }
     var source_name = args(0);
     var file_source = new File(source_name)
+    def arg_getterer(names: Array[String])(arglist: AtomishArgs): MMap[String, AtomishThing] = {
+      var outargs: MMap[String, AtomishThing] = MMap()
+      var positional: Stack[AtomishThing] = Stack()
+      arglist.args.foreach(_ match {
+        case Left(x:AtomishThing) => positional.push(x)
+        case Right((name, value)) => outargs(name) = value
+      })
+      val keys = outargs.keySet
+      names.filter(x => !keys.contains(x)).zip(positional).foreach(kv => outargs(kv._1) = kv._2)
+      outargs
+    }
+    val thing: Array[String] = Array[String]("file_base", "file_name")
+    val file_args = arg_getterer(thing) _;
+    def get_file(file_bits: MMap[String, AtomishThing]): File = {
+      (if(file_bits.isDefinedAt("absolute_path")) {
+          new File(file_bits("absolute_path").asInstanceOf[AtomishString].value).getAbsoluteFile()
+        } else if(file_bits.isDefinedAt("relative_path")) {
+          new File(file_bits("relative_path").asInstanceOf[AtomishString].value).getAbsoluteFile()
+        } else if(file_bits.isDefinedAt("file_base")) {
+          (if(file_bits.isDefinedAt("file_name")) {
+            new File(file_bits("file_base").asInstanceOf[AtomishString].value, file_bits("file_name").asInstanceOf[AtomishString].value).getAbsoluteFile()
+          } else {
+            new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_bits("file_base").asInstanceOf[AtomishString].value).getAbsoluteFile()
+          })
+        } else {
+          null // Should error here
+      })
+    }
     u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
       "programArguments" -> AtomishArray(args.drop(1).map(x => AtomishString(x)))
     ))
     u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
       "cwd"              -> AtomishString(file_source.getAbsoluteFile().getParent()),
-      "exists?"          -> AlienProxy(_.args match {
-        case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).exists)
-        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishBoolean((new File(file_base, file_name)).exists)
-        case _                                    => AtomishUnset //Should soft error
+      "exists?"          -> AlienProxy(base_args => {
+        val file_bits = file_args(base_args)
+        AtomishBoolean(get_file(file_bits).exists)
       }),
-      "removeFile!"      -> AlienProxy(_.args match {
-        case List(Left(AtomishString(file_name))) => AtomishBoolean((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).delete())
-        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishBoolean((new File(file_base, file_name)).delete())
+      "removeFile!"      -> AlienProxy(base_args => {
+        val file_bits = file_args(base_args)
+        AtomishBoolean(get_file(file_bits).delete())
       }),
-      "parentOf"         -> AlienProxy(_.args match {
-        case List(Left(AtomishString(file_name))) => AtomishString((new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)).getParent())
-        case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => AtomishString((new File(file_base, file_name)).getParent())
+      "parentOf"         -> AlienProxy(base_args => {
+        val file_bits = file_args(base_args)
+        AtomishString(get_file(file_bits).getParent())
       }),
       "withOpenFile"     -> AlienProxy(x => {
         var(file_base, file_name, lexical_thingy) = x.args match {
