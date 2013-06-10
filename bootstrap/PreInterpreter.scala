@@ -64,10 +64,11 @@ object PreAtomishInterpreter {
         })
     }
     u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
+      "programDirectory" -> AtomishString(file_source.getCanonicalFile().getParentFile().getCanonicalPath()),
       "programArguments" -> AtomishArray(args.drop(1).map(x => AtomishString(x)))
     ))
     u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
-      "cwd"              -> AtomishString(file_source.getCanonicalFile().getParentFile().getCanonicalPath()),
+      "cwd"              -> AtomishString(new File(".").getCanonicalPath()),
       "exists?"          -> AlienProxy(base_args => {
         val file_bits = file_args(base_args)
         AtomishBoolean(get_file(file_bits).exists)
@@ -108,7 +109,7 @@ object PreAtomishInterpreter {
         case List(Left(AtomishString(file_name))) => (u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value, file_name)
         case List(Left(AtomishString(file_base)), Left(AtomishString(file_name))) => (file_base, file_name)
       }
-      var file_source = new BufferedSource(new FileInputStream(new File(u.roots("FileSystem").cells("cwd").asInstanceOf[AtomishString].value,
+      var file_source = new BufferedSource(new FileInputStream(new File(file_base,
         file_name)))
       AtomishString(file_source.addString(new StringBuilder(1024)).toString())
       })
