@@ -112,6 +112,7 @@ velkdjfhvl . . .) asArray [0] args each(f,
   say(print(f))
   say("Idempotent: #{eval(unquote(''(mirror idempotent?(`(''(`(f))))))) asText}")
   say("Message: #{eval(unquote(''(mirror message?(`(''(`(f))))))) asText}")
+  say("Call: #{eval(unquote(''(mirror call?(`(''(`(f))))))) asText}")
   say("Dot: #{eval(unquote(''(mirror dot?(`(''(`(f))))))) asText}"))
 let(wrgreg, 54,
   say(eval(read("wrgreg")) asText))

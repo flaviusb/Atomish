@@ -13,6 +13,10 @@ object PreScalaMirror {
       case Array(AtomishCall("'", Array(x: AtomishMessage))) => AtomishBoolean(true)
       case _                                                 => AtomishBoolean(false)
     }),
+    "call?"       -> QAlienProxy(_.args match {
+      case Array(AtomishCall("'", Array(x: AtomishCall))) => AtomishBoolean(true)
+      case _                                              => AtomishBoolean(false)
+    }),
     "dot?"        -> QAlienProxy(_.args match {
       case Array(AtomishCall("'", Array(AtomishNL))) => AtomishBoolean(true)
       case _                                         => AtomishBoolean(false)
