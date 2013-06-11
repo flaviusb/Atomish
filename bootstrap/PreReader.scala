@@ -54,6 +54,7 @@ object AtomishParser extends RegexParsers {
   }
   def interpolated_section: Parser[AtomishCode] = "#{" ~ code ~ "}" ^^ { case "#{" ~ interpolated_code ~ "}" => interpolated_code }
   def qstring   = ("\"" ~ ((interpolated_section | (("""([^"\\])""".r | qstring_escapes) ^^ { AtomishString(_) }))*) ~ "\"") ^^ {
+    case "\"" ~ List() ~  "\"" => AtomishString("")
     case "\"" ~ List(AtomishString(x)) ~  "\"" => AtomishString(x)
     case "\"" ~ chunks ~ "\"" => {
       var interpolated_list = MList[AtomishCode]()
