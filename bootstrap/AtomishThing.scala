@@ -54,8 +54,10 @@ object AtomishThing {
           thing.cells(x)
         } else if(AtomishThing.post_bootstrap.isDefinedAt((thing.pre_type, x))) {
           AtomishThing.post_bootstrap((thing.pre_type, x))(thing)
-        } else {
+        } else if(AtomishThing.bootstrap_cells.isDefinedAt(x)) {
           AtomishThing.bootstrap_cells(x)(thing)
+        } else {
+          throw new NoSuchCellException("No cell \""+x+"\" on "+PreScalaPrinter.print_with_forms(thing))
         }
       }
     }) },
@@ -494,3 +496,5 @@ case class AtomishOrigin(var origin_with: MMap[String, AtomishThing] = MMap[Stri
   })
   cells ++= origin_with;
 }
+
+class NoSuchCellException(msg: String) extends RuntimeException(msg)
