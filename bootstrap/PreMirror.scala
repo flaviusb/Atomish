@@ -21,6 +21,10 @@ object PreScalaMirror {
       case Array(AtomishCall("'", Array(AtomishNL))) => AtomishBoolean(true)
       case _                                         => AtomishBoolean(false)
     }),
+    "brackets?"   -> QAlienProxy(_.args match {
+      case Array(AtomishCall("'", Array(x: AtomishCommated))) => AtomishBoolean(true)
+      case _                                                  => AtomishBoolean(false)
+    }),
     "cells"       -> QAlienProxy(ctd => { AtomishUnset }),
     "code?"       -> QAlienProxy(ctd => { AtomishUnset }),
     "origin?"     -> QAlienProxy(ctd => { AtomishUnset }),

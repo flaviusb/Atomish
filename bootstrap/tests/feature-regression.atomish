@@ -103,16 +103,17 @@ say(mirror dot?(''(`(use))) asText)
 say(mirror dot?('(.)) asText)
 say(mirror dot?('(
 )) asText)
-say(print('(1 2 3 asd f
+say(print('(1 2 3 asd f (g m n(qdqw))
 fewf fewf(Wefwef) fsdw(asd, eqwffa: wdfwd, 435, wefwafe: wfawdfs) . "5" 
 velkdjfhvl . . .) asArray))
-'(1 2 3 asd f
+'(1 2 3 asd f (g m n(qdqw))
 fewf fewf(Wefwef) fsdw(asd, eqwffa: wdfwd, 435, wefwafe: wfawdfs) . "5" 
 velkdjfhvl . . .) asArray [0] args each(f, 
   say(print(f))
   say("Idempotent: #{eval(unquote(''(mirror idempotent?(`(''(`(f))))))) asText}")
   say("Message: #{eval(unquote(''(mirror message?(`(''(`(f))))))) asText}")
   say("Call: #{eval(unquote(''(mirror call?(`(''(`(f))))))) asText}")
+  say("Brackets: #{eval(unquote(''(mirror brackets?(`(''(`(f))))))) asText}")
   say("Dot: #{eval(unquote(''(mirror dot?(`(''(`(f))))))) asText}"))
 let(wrgreg, 54,
   say(eval(read("wrgreg")) asText))
