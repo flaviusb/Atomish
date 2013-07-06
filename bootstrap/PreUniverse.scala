@@ -282,14 +282,16 @@ class PreUniverse { self =>
             case _                        => Array(retpre)
           }
         }))
-        case AtomishForm(y)          => AtomishForm(y.flatMap(x => {
+        case AtomishForm(forms)      => AtomishForm(forms.map(form => unqq(form)))
+    /*y.flatMap(x => {
           //println("Forms: "+PreScalaPrinter.print(AtomishForm(y)))
           var retpre = unqq(x)
           retpre match {
             case AtomishCommated(preargs) => preargs
             case _                        => Array(retpre)
           }
-        }))
+        })*/
+        case AtomishCommated(commated)    => AtomishCommated(commated.map(bit => unqq(bit)))
         case x: AtomishCode               => x
       }
       AtomishCall("'",
