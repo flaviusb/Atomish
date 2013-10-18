@@ -1,0 +1,3 @@
+[submodule "preatomish/vendor/llvm"]
+	path = preatomish/vendor/llvm
+	url = http://llvm.org/git/llvm.git
