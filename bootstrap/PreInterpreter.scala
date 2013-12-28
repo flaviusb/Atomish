@@ -89,11 +89,23 @@ object PreAtomishInterpreter {
         var io_file = new File(file_base, file_name)
         var writer = new FileWriter(io_file);
         var io = AtomishOrigin(MMap[String, AtomishThing](
-          "put"   -> AlienProxy(_.args match {
+          "put"       -> AlienProxy(_.args match {
             case List(Left(AtomishString(x))) => { writer.write(x); AtomishUnset }
             case List(Left(x)) => { writer.write(PreScalaPrinter.print(x)); AtomishUnset }
           }),
-          "flush" -> AlienProxy(x => {writer.flush(); AtomishUnset})
+          "putBuffer" -> AlienProxy(_.args match {
+            case List(Left(AtomishArray(things))) => {
+              for(thing <- things) {
+                thing match {
+                  case AtomishInt(num)    => writer.write(num)
+                  case AtomishString(str) => writer.write(str)
+                  case x                  => writer.write(PreScalaPrinter.print(x))
+                }
+              }
+              AtomishUnset
+            }
+          }),
+          "flush"     -> AlienProxy(x => {writer.flush(); AtomishUnset})
         ))
         var ret = lexical_thingy match {
           case q: AlienProxy  => q.activate(AtomishArgs(List(Left(io))))
