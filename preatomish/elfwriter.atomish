@@ -1,0 +1,13 @@
+elfident = Array(0x7f, "ELF", 2, 1, 1, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0)
+
+elfheader = Array(
+  2, 0,
+  62, 0,
+  1, 0, 0, 0)
+
+FileSystem withOpenFile("foo.out", fn(x,
+  x putBuffer(elfident)
+  x putBuffer(elfheader)
+  ))
+  
