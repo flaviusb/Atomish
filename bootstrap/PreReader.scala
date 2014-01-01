@@ -23,7 +23,9 @@ object AtomishParser extends RegexParsers {
   def nll: Parser[AtomishCode] = "[.]|\\n|\\n\\r".r ^^ { x => AtomishNL }
   def wss: Parser[String] = "[ ]+".r ^^ { x => "" }
   def rational = "[+-]?[0-9]+\\.[0-9]+".r ^^ { (double: String) => AtomishDecimal(double.toDouble) }
-  def integer  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
+  def dinteger  = "[+-]?[0-9]+".r ^^ { (int: String) => AtomishInt(int.toInt) }
+  def hinteger  = "0x" ~ "[0-9a-fA-F]+".r ^^ { case "0x" ~ (int: String) => AtomishInt(Integer.parseInt(int, 16)) }
+  def integer  = (hinteger | dinteger)
   // In the actual AtomishLanguage, flagcheck should be implemented as a reader macro
   def flagcheck = "#" ~ "[_+:]*[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r ^^ {
     case "#" ~ flagName => {
