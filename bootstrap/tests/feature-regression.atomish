@@ -59,6 +59,8 @@ l = Array(1, 2, 3)
 say(print_with_forms(
   read("unquote(''(foo(1, 2, `*(l), 7, 8)))")))
 say(print(unquote(''(foo(1, 2, `*(l), 7, 8)))))
+say(print(unquote(''(foo(1, 2,
+  `*(l), 7, 8)))))
 zog = fn(q, w, e,
   cond(
     q,       " Q ",

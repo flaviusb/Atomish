@@ -282,7 +282,18 @@ class PreUniverse { self =>
             case _                        => Array(retpre)
           }
         }))
-        case AtomishForm(forms)      => AtomishForm(forms.map(form => unqq(form)))
+        case AtomishForm(forms)      => {
+          // If forms is all '(.) except for the last elem, which is '(`) or '(`*), treat it as bare '(`) or '(`*) respectively
+          if((forms.length >= 1) && (forms.dropRight(1).forall(x => (x == AtomishNL)))) {
+            forms.last match {
+              case AtomishCall("`", x)  => unqq(forms.last)
+              case AtomishCall("`*", x) => unqq(forms.last)
+              case _                    => AtomishForm(forms.map(form => unqq(form)))
+            }
+          } else {
+            AtomishForm(forms.map(form => unqq(form)))
+          }
+        }
     /*y.flatMap(x => {
           //println("Forms: "+PreScalaPrinter.print(AtomishForm(y)))
           var retpre = unqq(x)
