@@ -1,13 +1,37 @@
 elfident = Array(0x7f, "ELF", 2, 1, 1, 0,
                   0, 0, 0, 0, 0, 0, 0, 0)
 
-elfheader = Array(
+#; placeholders for some parts of the elf header
+
+entry = Array()
+phoff = Array()
+shoff = Array()
+flags = Array(0, 0, 0, 0)
+header_size = Array(0x40, 0)
+phentsize = Array()
+phnum = Array()
+shentsize = Array()
+shnum = Array()
+shstrindex = Array()
+
+elfheader = eval(unquote(''(Array(`*(elfident),
   2, 0,
   62, 0,
-  1, 0, 0, 0)
+  1, 0, 0, 0,
+  `*(entry),
+  `*(phoff),
+  `*(shoff),
+  `*(flags),
+  `*(header_size),
+  `*(phentsize),
+  `*(phnum),
+  `*(shentsize),
+  `*(shnum),
+  `*(shstrindex)))))
+
+say(print(elfheader))
 
 FileSystem withOpenFile("foo.out", fn(x,
-  x putBuffer(elfident)
   x putBuffer(elfheader)
   ))
   
