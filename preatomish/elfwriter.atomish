@@ -4,7 +4,7 @@ elfident = Array(0x7f, "ELF", 2, 1, 1, 0,
 #; placeholders for some parts of the elf header
 
 entry = Array()
-phoff = Array()
+phoff = Array(0x40, 0, 0, 0, 0, 0, 0, 0) #; Start the program header immediately after the elf header
 shoff = Array()
 flags = Array(0, 0, 0, 0)
 header_size = Array(0x40, 0) #; This is the size of 'elfheader in bytes
