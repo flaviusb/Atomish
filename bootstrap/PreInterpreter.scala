@@ -6,6 +6,15 @@ import scala.io.{BufferedSource}
 import scala.collection.mutable.{Map => MMap, Stack}
 
 object PreAtomishInterpreter {
+  val repl = AtomishString("()") // Put the repl connection code in here
+  val help_string = 
+"""preatomish: An interpreter for a pre-Atomish language
+  preatomish [options|filename]
+  -h        This help text
+  -i        Interactive/repl mode
+  -e TEXT   Run TEXT as a script
+  filename  Run the file
+  """
   var u = new PreUniverse()
   var r = new PreReader()
   var e = PreEvaller.eval(u) _;
@@ -29,8 +38,22 @@ object PreAtomishInterpreter {
       println("No file specified.")
       return
     }
-    var source_name = args(0);
-    var file_source = new File(source_name)
+    var (src_type, source_name: Option[String], src: AtomishString) = args(0) match {
+      case "-e" => (Some("expression"), None, AtomishString(args(1)))
+      case "-i" => (Some("repl")      , None, repl)
+      case "-h" => {
+        println(help_string)
+        (None, None, "")
+      }
+      case file => (Some("file"), Some(file), AtomishString(""))
+    }
+    if (src_type == None) {
+      System.exit(0)
+    }
+    var file_source: Option[File] = None
+    for(name <- source_name) {
+      file_source = Some(new File(name))
+    }
     def arg_getterer(names: Array[String])(arglist: AtomishArgs): MMap[String, AtomishThing] = {
       var outargs: MMap[String, AtomishThing] = MMap()
       var positional: Stack[AtomishThing] = Stack()
@@ -64,7 +87,11 @@ object PreAtomishInterpreter {
         })
     }
     u.roots("System") = AtomishOrigin(MMap[String, AtomishThing](
-      "programDirectory" -> AtomishString(file_source.getCanonicalFile().getParentFile().getCanonicalPath()),
+      "programDirectory" -> (if(file_source == None) {
+        AtomishUnset
+      } else {
+        AtomishString(file_source.get.getCanonicalFile().getParentFile().getCanonicalPath())
+      }),
       "programArguments" -> AtomishArray(args.drop(1).map(x => AtomishString(x)))
     ))
     u.roots("FileSystem") = AtomishOrigin(MMap[String, AtomishThing](
@@ -274,8 +301,10 @@ object PreAtomishInterpreter {
     var prelude_source = new BufferedSource(new FileInputStream(new File(libs_dir, "prelude.atomish")))
     var prelude = AtomishString(prelude_source.addString(new StringBuilder(1024)).toString())
     e(r.read(prelude), None)
-    var stream_source = new BufferedSource(new FileInputStream(file_source))
-    var src = AtomishString(stream_source.addString(new StringBuilder(1024)).toString())
+    for(file <- file_source) {
+      var stream_source = new BufferedSource(new FileInputStream(file))
+      src = AtomishString(stream_source.addString(new StringBuilder(1024)).toString())
+    }
     //println(src)
     e(r.read(src), None);
   }
