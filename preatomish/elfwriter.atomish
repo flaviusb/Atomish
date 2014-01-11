@@ -2,7 +2,9 @@ elfident = Array(0x7f, "ELF", 2, 1, 1, 0,
                   0, 0, 0, 0, 0, 0, 0, 0)
 
 #; placeholders for some parts of the elf header
-
+file_type = Array(2, 0) #; Executable
+processor = Array(62, 0) #; AMD64
+file_version = Array(1, 0, 0, 0) #; Version 1 is current version
 entry = Array()
 phoff = Array(0x40, 0, 0, 0, 0, 0, 0, 0) #; Start the program header immediately after the elf header
 shoff = Array()
@@ -14,10 +16,17 @@ shentsize = Array()
 shnum = Array()
 shstrindex = Array()
 
-elfheader = eval(unquote(''(Array(`*(elfident),
-  2, 0,
-  62, 0,
-  1, 0, 0, 0,
+num_to_bytes = fn("Converts a number to an array of bytes naively.", number, bytes: 2,
+    0 …(bytes - 1) toArray map(num, number ÷(256 exp(num)) rem(256)))
+
+sq = macro(
+  let(contents, arguments at(0),
+      eval(unquote(''(fn(eval(unquote(''(`*(contents))))))))))
+
+elfheader = sq(Array(`*(elfident),
+  `*(file_type),
+  `*(processor),
+  `*(file_version),
   `*(entry),
   `*(phoff),
   `*(shoff),
@@ -27,7 +36,7 @@ elfheader = eval(unquote(''(Array(`*(elfident),
   `*(phnum),
   `*(shentsize),
   `*(shnum),
-  `*(shstrindex)))))
+  `*(shstrindex)))
 
 say(print(elfheader))
 
