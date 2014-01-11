@@ -34,4 +34,3 @@ use = fn(file_name, base: FileSystem cwd,
   eval(read(FileSystem readFully(base, file_name))))
 Shell out = fn("Shell out to a subprocess with working directory pwd:, write stdin: to the standard input of the subprocess, and use printer: to alter the display printer. The fn exit_status: will be called with the exit status.", printer: '(fn(x, say("From subshell: #{x}"))), exit_status: '(fn(x, say("Exited subshell with status #{x}"))), +cmd, pwd: FileSystem cwd, stdin: false, env: Map(),
       Shell _out(printer, exit_status, pwd, stdin, env, cmd))
-

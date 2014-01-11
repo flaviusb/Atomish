@@ -502,6 +502,24 @@ case class AtomishOrigin(var origin_with: MMap[String, AtomishThing] = MMap[Stri
     y.cells = cells;
     y
   })
+  cells("bootstrap_add") = AlienProxy(_.args match {
+    case List(Left(AtomishString(protocol)), Left(AtomishString(method)), Left(thing: AlienProxy)) => {
+      AtomishThing.post_bootstrap((protocol, method)) = {base => thing.activate(AtomishArgs(List(Left(base))))}
+      AtomishBoolean(true)
+    }
+    case _ => {
+      AtomishBoolean(false)
+    }
+  })
+  cells("bootstrap_remove") = AlienProxy(_.args match {
+    case List(Left(AtomishString(protocol)), Left(AtomishString(method))) => {
+      AtomishThing.post_bootstrap.remove((protocol, method))
+      AtomishBoolean(true)
+    }
+    case _ => {
+      AtomishBoolean(false)
+    }
+  })
   cells ++= origin_with;
 }
 
