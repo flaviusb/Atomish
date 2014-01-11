@@ -116,7 +116,11 @@ case class AtomishInt(value: Int) extends AtomishThing with AtomishCode with Ide
     ">="     -> AlienProxy(inttobool(a => value >= a)),
     "…"      -> AlienProxy(_.args match {
       case List(Left(end: AtomishInt)) => {
-        AtomishOrigin(MMap[String, AtomishThing]("start" -> AtomishInt(value), "end" -> end))
+        var range = AtomishOrigin(MMap[String, AtomishThing]("start" -> AtomishInt(value), "end" -> end, "toArray" -> AlienProxy(a => {
+          AtomishArray(value.to(end.value).toArray.map(x => AtomishInt(x)))
+        })))
+        range.pre_type = "Range"
+        range
       }
     })
   )
