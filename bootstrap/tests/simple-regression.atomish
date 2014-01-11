@@ -1,5 +1,6 @@
 say(1.0 +(1.0) ×(1.1) -(22.2) +(3.0 ÷(2.0)) asText)
 say(1 +(0x7) ×(-33) -(0x7f) asText)
+say(111111 rem(0x7) exp(-33) asText)
 say("fo\no").say("moo") . say("wh\\o?")
 say("hello" +(" ") +("world"))
 say("")
