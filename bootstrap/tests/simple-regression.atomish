@@ -86,7 +86,7 @@ Array(Array(0, 1), Array(0, 3), Array(0, -2), Array(2, 4), Array(4, 2), Array(-1
 say(print((0 … 13) toArray map(+(13))))
 let(
   foow, Array(1, 2, 3, 4, 5),
-  zogw, fn(foow pop!),
+  zogw, . fn(foow pop!),
   zogw
   zogw
   say(print(foow)))

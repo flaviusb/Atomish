@@ -146,9 +146,16 @@ class PreUniverse { self =>
             (None, args, code)
           }
         })
+        // Trim leading newlines in each argument 
+        var trimmed_args = args.map(_ match {
+          case AtomishForm(arg_chain) => {
+            AtomishForm(arg_chain.dropWhile(_ == AtomishNL))
+          }
+          case x                      => x
+        })
         // Separate arguments into kinds
         var (slurpy: Option[(String, Option[AtomishCode])], kwslurpy: Option[(String, Option[AtomishCode])]) = (None, None)
-        val (finargs_a: Array[(String, (String, Option[AtomishCode]))], kwargs_a: Array[(String, (String, Option[AtomishCode]))]) = args.flatMap(_ match {
+        val (finargs_a: Array[(String, (String, Option[AtomishCode]))], kwargs_a: Array[(String, (String, Option[AtomishCode]))]) = trimmed_args.flatMap(_ match {
           case AtomishMessage(name)                               => {
             if(name.startsWith("+:")) {
               kwslurpy = Some((name.substring(2, name.length), None))
