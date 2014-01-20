@@ -365,6 +365,11 @@ class PreUniverse { self =>
         ))
       }
     }),
+    ":"         -> QAlienProxy(_.args match {
+      case Array(AtomishMessage(name)) => {
+        AtomishSymbol(name)
+      }
+    }),
     "="         -> QAlienProxy(ctd => ctd.args match {
       case Array(AtomishMessage(cell_name), x) => {
         var ret = roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))

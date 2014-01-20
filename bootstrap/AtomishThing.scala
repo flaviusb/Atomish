@@ -232,6 +232,13 @@ case class dectobool(call: Double => Boolean) extends (AtomishArgs => AtomishBoo
   }
 }
 
+case class AtomishSymbol(value: String) extends AtomishThing with AtomishCode with IdempotentEval {
+  pre_type = "Symbol"
+  cells ++= MMap[String, AtomishThing](
+    "asText" -> AlienProxy(_ => AtomishString(value))
+  )
+}
+
 case class AtomishString(value: String) extends AtomishThing with AtomishCode with IdempotentEval {
   pre_type = "Text"
   cells ++= MMap[String, AtomishThing](
