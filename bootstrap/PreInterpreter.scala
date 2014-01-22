@@ -10,10 +10,11 @@ object PreAtomishInterpreter {
   val help_string = 
 """preatomish: An interpreter for a pre-Atomish language
   preatomish [options|filename]
-  -h        This help text
-  -i        Interactive/repl mode
-  -e TEXT   Run TEXT as a script
-  filename  Run the file
+  -h            This help text
+  -i            Interactive/repl mode
+  -e TEXT       Run TEXT as a script
+  --no-prelude  Do not load the prelude
+  filename      Run the file
   """
   var u = new PreUniverse()
   var r = new PreReader()
@@ -33,7 +34,13 @@ object PreAtomishInterpreter {
     case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print_with_forms(arg))
     case _                             => null // Should error
   })
-  def main(args: Array[String]): Unit = {
+  def main(old_args: Array[String]): Unit = {
+    var load_prelude = true
+    var args = old_args;
+    if(old_args.contains("--no-prelude")) {
+      load_prelude = false
+      args = old_args.filter(_ != "--no-prelude")
+    }
     if(args.length == 0) {
       println("No file specified.")
       return
@@ -298,9 +305,11 @@ object PreAtomishInterpreter {
       }) }
     )
     var libs_dir: String = System.getProperty("atomish.lib", ".")
-    var prelude_source = new BufferedSource(new FileInputStream(new File(libs_dir, "prelude.atomish")))
-    var prelude = AtomishString(prelude_source.addString(new StringBuilder(1024)).toString())
-    e(r.read(prelude), None)
+    if(load_prelude) {
+      var prelude_source = new BufferedSource(new FileInputStream(new File(libs_dir, "prelude.atomish")))
+      var prelude = AtomishString(prelude_source.addString(new StringBuilder(1024)).toString())
+      e(r.read(prelude), None)
+    }
     for(file <- file_source) {
       var stream_source = new BufferedSource(new FileInputStream(file))
       src = AtomishString(stream_source.addString(new StringBuilder(1024)).toString())
