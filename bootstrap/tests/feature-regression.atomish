@@ -130,3 +130,7 @@ say(("foo" ⇒ "bar") value)
 say(("foo" ⇒ "bar") pair? asText)
 say(("foo" ⇒ "bar") #pair? asText)
 say(("foo" +("bar")) #pair? asText)
+say(print(%w{zog bar niff/le w:er4
+  d qwd   wefwefwefiohswdfoiwdfiwdfpoi" wef /
+dwf
+wgwrgf wef wqz *}))

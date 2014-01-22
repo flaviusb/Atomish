@@ -5,16 +5,16 @@ elfident = Array(0x7f, "ELF", 2, 1, 1, 0,
 file_type = Array(2, 0) #; Executable
 processor = Array(62, 0) #; AMD64
 file_version = Array(1, 0, 0, 0) #; Version 1 is current version
-entry = Array()
+entry = Array() #; 8 bytes
 phoff = Array(0x40, 0, 0, 0, 0, 0, 0, 0) #; Start the program header immediately after the elf header
-shoff = Array()
+shoff = Array() #; 8 bytes
 flags = Array(0, 0, 0, 0)
 header_size = Array(0x40, 0) #; This is the size of 'elfheader in bytes
 phentsize = Array(0x38, 0) #; This is the number of bytes in a Elf64_Phdr struct, which can be found in the ELF specification
-phnum = Array()
-shentsize = Array()
-shnum = Array()
-shstrindex = Array()
+phnum = Array() #; 2 bytes
+shentsize = Array() #; 2 bytes
+shnum = Array() #; 2 bytes
+shstrindex = Array() #; 2 bytes
 
 num_to_bytes = fn("Converts a number to an array of bytes naively.", number, bytes: 2,
     0 …(bytes - 1) toArray map(num, number ÷(256 exp(num)) rem(256)))

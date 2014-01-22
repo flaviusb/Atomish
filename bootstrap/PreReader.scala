@@ -32,6 +32,15 @@ object AtomishParser extends RegexParsers {
       AtomishCall("flag", Array(AtomishString(flagName)))
     }
   }
+  // In the actual AtomishLanguage, %w etc should be implemented as part of the MMOP
+  def pct_w = "%w{" ~ (("[^\\s}]+".r ~ "[\\s]*".r)*) ~ "}" ^^ {
+    case "%w{" ~ List() ~ "}"  => AtomishArray(Array())
+    case "%w{" ~ x ~ "}"       => {
+      AtomishArray(x.map(_ match {
+        case value ~ _ => AtomishString(value)
+      }).toArray)
+    }
+  }
   def regex_escapes = ("""\/""" | """\\""" | """\n""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
@@ -88,7 +97,7 @@ object AtomishParser extends RegexParsers {
   def symbol: Parser[AtomishCall] = ":" ~ identifier ^^ { case ":" ~ symb => AtomishCall(":", Array(symb)) }
   def identifier: Parser[AtomishMessage] = ("([_+]+[_+:]*)?[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+".r | "[]"
     | "{}" | "…") ^^ { AtomishMessage(_) }
-  def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | symbol | identifier
+  def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | symbol | pct_w | identifier
     | flagcheck | nll) // This will eventually be a big union of all types that can constitute standalone code
   def code_bit: Parser[List[AtomishCode]] = (((wss*) ~ code_tiny_bit)*) ^^ { _.flatMap { 
     case x ~ (code_piece: AtomishCode)         => List(code_piece)
