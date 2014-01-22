@@ -101,7 +101,7 @@ say(BAR qwwx(BAR quux))
 Shell out("echo", "foo")
 Shell out("diff", "simple-regression.atomish", "feature-regression.atomish", printer: '(fn(x, x)))
 mirror = Mirror ["pre_scala_mirror"]
-say(mirror idempotent?('(3))asText)
+say(mirror idempotent?('(3)) asText)
 say(eval(unquote(''(mirror idempotent?(`(''("3")))))) asText)
 say(mirror idempotent?('(3 +(4))) asText)
 say(mirror idempotent?('(use)) asText)
