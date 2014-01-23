@@ -92,3 +92,11 @@ let(
   zogw
   zogw
   say(print(foow)))
+say(print([1, 2, 3]))
+MOO = ["m", "o", "o"]
+MOO each(x, say(x))
+say(["oiu", "gerg"] [1])
+say(print([1]))
+#;MOO = ["m"]
+#;MOO each(x, say(x))
+#;say(["oiu"] [0])

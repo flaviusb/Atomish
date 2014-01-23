@@ -41,6 +41,10 @@ object AtomishParser extends RegexParsers {
       }).toArray)
     }
   }
+  def commated_code = code ~ ((("," ~ code) ^^ {case x ~ y => y})*) ^^ { case x ~ y => x::y }
+  def square_array: Parser[AtomishCode] = "[" ~ ((nlws*) ~ (commated_code ~ ((nlws*) ~ "]"))) ^^ {
+    case "[" ~ (x ~ (y ~ (z ~ "]"))) => AtomishCall("Array", y.toArray)
+  }
   def regex_escapes = ("""\/""" | """\\""" | """\n""" | """\r""") ^^ {
     case """\\""" => """\"""
     case """\n""" => "\n"
@@ -97,7 +101,7 @@ object AtomishParser extends RegexParsers {
   def symbol: Parser[AtomishCall] = ":" ~ identifier ^^ { case ":" ~ symb => AtomishCall(":", Array(symb)) }
   def identifier: Parser[AtomishMessage] = ("([_+]+[_+:]*)?[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+".r | "[]"
     | "{}" | "…") ^^ { AtomishMessage(_) }
-  def literal = ((regex: Parser[AtomishRegex]) | string | rational | integer | symbol | pct_w)
+  def literal = ((regex: Parser[AtomishRegex]) | string | rational | integer | symbol | pct_w | square_array)
   def lside   = (literal | rside_bit)
   def rside_bit = (comment | at_square | literal | commated | atomish_call | identifier | flagcheck)
   def rside: Parser[List[AtomishCode]]   = (rside_bit ~ ((((wss) ~ rside_bit) ^^ {
