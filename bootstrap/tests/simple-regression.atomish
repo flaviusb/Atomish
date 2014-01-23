@@ -99,4 +99,4 @@ say(["oiu", "gerg"] [1])
 say(print([1]))
 #;MOO = ["m"]
 #;MOO each(x, say(x))
-#;say(["oiu"] [0])
+say(["oiu"] [0])
