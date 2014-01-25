@@ -100,3 +100,18 @@ say(print([1]))
 #;MOO = ["m"]
 #;MOO each(x, say(x))
 say(["oiu"] [0])
+say(print({a: 1, b: 2, c: 3}))
+say(print({"a" ⇒ 1, :b ⇒ 2, 3 ⇒ "c"}))
+MOO = {1 ⇒ "m", "f" ⇒ "o", 3.2 ⇒ "o"}
+#;MOO = Map(1 ⇒ "m", "f" ⇒ "o", 3.2 ⇒ "o")
+say(print(MOO))
+say(print(MOO keys))
+say(print(MOO values))
+MOO keys each(x, say(print(x)))
+MOO values each(x, say(print(x)))
+say({b: "oiu", m: "gerg"} ["m"])
+say(print({w: 1}))
+#;MOO = [w: "m"]
+#;MOO each(x, say(x))
+say({b: "oiu"} ["b"])
+say({5 ⇒ "oiu"} [5])

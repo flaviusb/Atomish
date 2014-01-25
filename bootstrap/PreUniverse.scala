@@ -341,7 +341,14 @@ class PreUniverse { self =>
       case _       => Array[AtomishThing]()
     }).toArray)),
     "Map"       -> AlienProxy(arg_blob => AtomishMap(arg_blob.args.map(_ match {
-      case Right((x, y)) => MMap[AtomishThing, AtomishThing](AtomishString(x) -> y)
+      case Right((x, y))            => MMap[AtomishThing, AtomishThing](AtomishString(x) -> y)
+      case Left(x: AtomishOrigin)  => {
+        if(x.cells.isDefinedAt("pair?") && x.cells("pair?") == AtomishBoolean(true)) {
+          MMap[AtomishThing, AtomishThing](x.cells("key") -> x.cells("value"))
+        } else {
+          MMap[AtomishThing, AtomishThing]()
+        }
+      }
       case _             => MMap[AtomishThing, AtomishThing]()
     }).foldLeft(MMap[AtomishThing, AtomishThing]())(_ ++ _))),
     "Origin"    -> AtomishOrigin(),
