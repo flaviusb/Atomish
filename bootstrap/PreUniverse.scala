@@ -380,7 +380,18 @@ class PreUniverse { self =>
     "="         -> QAlienProxy(ctd => ctd.args match {
       case Array(AtomishMessage(cell_name), x) => {
         var ret = roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x))))
-        roots(cell_name) = ret
+        var found = false
+        scopes.foreach(scope => {
+          if(!found) {
+            if(scope.isDefinedAt(cell_name) && (scope(cell_name) != AtomishUnset)) {
+              found = true
+              scope(cell_name) = ret
+            }
+          }
+        })
+        if(!found) {
+          roots(cell_name) = ret
+        }
         ret
       }
       //case _                                   => {
