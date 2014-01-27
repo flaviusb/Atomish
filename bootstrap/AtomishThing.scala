@@ -283,11 +283,12 @@ case class AtomishString(value: String) extends AtomishThing with AtomishCode wi
       case List(Left(AtomishRegex(pattern, flags))) => {
         var regex = new Pattern(pattern, flags.mkString)
         var matcher = regex.matcher(value)
+        var found = matcher.find()
         AtomishOrigin(MMap[String, AtomishThing](
-          "isTruthy" -> AtomishBoolean(matcher.matches()),
-          "isFalsy"  -> AtomishBoolean(!matcher.matches()),
+          "isTruthy" -> AtomishBoolean(found),
+          "isFalsy"  -> AtomishBoolean(!found),
           "names"    -> AtomishArray(regex.getGroupNames().toArray.map(x => AtomishString(x.asInstanceOf[String]))),
-          "asBool"   -> AtomishBoolean(matcher.matches()),
+          "asBool"   -> AtomishBoolean(found),
           "at"       -> AlienProxy(_.args match {
             case List(Left(AtomishInt(group_number))) => {
               if((group_number < matcher.groupCount()) && (matcher.isCaptured(group_number))) {
