@@ -21,6 +21,11 @@ object PreScalaPrinter {
         (if(print_form_explicit) {"AtomishForm("} else {""}) + x.map(part => print(part, print_form_explicit)).mkString(" ") + (if(print_form_explicit) {")"} else {""})
       }
       case AtomishNL               => " . "
+      case AtomishOrigin(cells)    => {
+        "AtomishOrigin(MutableMap(" + cells.map(
+          x => x._1 + " -> " + print(x._2, print_form_explicit)
+        ).mkString(", ") + "))"
+      }
       case x: AtomishThing         => x.toString()
     }
   }
