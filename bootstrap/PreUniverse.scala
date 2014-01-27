@@ -6,112 +6,8 @@ class PreUniverse { self =>
   var gensyms: MMap[Int, AtomishThing] = MMap[Int, AtomishThing]()
   var currgs: Int = 1
   var scopes: MList[MMap[String, AtomishThing]] = MList() // New scopes go on the front of the list
-  var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing](
-    "version" -> AtomishDecimal(0.1),
-    "say"     -> AlienProxy(_.args match {
-      case List(Left(AtomishString(x))) => {
-        println(x)
-        AtomishUnset
-      }
-      case x                            => {
-        println(x.toString())
-        AtomishUnset
-      }
-    }),
-    "setCell"   -> AlienProxy(_.args match {
-      case List(Left(AtomishString(name)), Left(value: AtomishThing)) => {
-        self(AtomishPlace(AtomishMessage(name))) = Option(value)
-        value
-      }
-    }),
-    "cell"   -> AlienProxy(_.args match {
-      case List(Left(AtomishString(name))) => {
-        self(AtomishPlace(AtomishMessage(name))).get
-      }
-    }),
-    "hasCell"   -> AlienProxy(_.args match {
-      case List(Left(AtomishString(name))) => {
-        val thing = self(AtomishPlace(AtomishMessage(name)))
-        AtomishBoolean((thing != None) && (thing != Some(AtomishUnset)))
-      }
-    }),
-    "let"       -> QAlienProxy(ctd => {
-      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => ((x(0) match {
-        case AtomishForm(things)   => things.filter(_ != AtomishNL)(0).asInstanceOf[AtomishMessage].name
-        case AtomishMessage(name)  => name
-      }), self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x(1)))))))).toMap;
-      var arrcode: Array[AtomishCode] = ((ctd.args grouped(2) filter(_.length == 1) flatMap((x: Array[AtomishCode]) => x)).toArray);
-      var code = arrcode(0)
-      scopes = (MMap() ++ args) +: scopes;
-      //println(code.toString())
-      var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
-      var sco = scopes.tail;
-      scopes = sco;
-      //println(result.toString())
-      //AtomishUnset
-      result
-    }),
-    "true"      -> AtomishBoolean(true),
-    "false"     -> AtomishBoolean(false),
-    "if"        -> QAlienProxy(ctd => {
-      if(ctd.args.length == 0) {
-        AtomishUnset
-      } else {
-        var real_arg_zero = ctd.args(0)
-        var it_name: Option[String] = (ctd.args(0) match {
-          case AtomishForm(List(AtomishMessage(maybe_name), x @_*)) => {
-            if(maybe_name.endsWith(":")) {
-              real_arg_zero = AtomishForm(x.toList)
-              Some(maybe_name.substring(0, maybe_name.length - 1))
-            } else {
-              None
-            }
-          }
-          case _                                                    => None
-        })
-        var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(real_arg_zero))))
-        if (
-          (test == AtomishBoolean(true)) ||
-          (test.cells.isDefinedAt("isTruthy") &&
-            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isTruthy"))))) == AtomishBoolean(true))) ||
-          (test.cells.isDefinedAt("asBool") &&
-            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(true)))
-          ) {
-          if(ctd.args.length >= 2) {
-            for(name <- it_name) {
-              scopes = MMap(name -> test) +: scopes;
-            }
-            var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))));
-            if (it_name != None) {
-              var sco = scopes.tail;
-              scopes = sco;
-            }
-            result
-          } else {
-            AtomishUnset
-          }
-        } else if((ctd.args.length >= 3) && (
-          (test == AtomishBoolean(false)) ||
-          (test.cells.isDefinedAt("isFalsy") &&
-            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isFalsy"))))) == AtomishBoolean(true))) ||
-          (test.cells.isDefinedAt("asBool") &&
-            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(false)))
-        )) {
-          for(name <- it_name) {
-            scopes = MMap(name -> test) +: scopes;
-          }
-          var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))));
-          if (it_name != None) {
-            var sco = scopes.tail;
-            scopes = sco;
-          }
-          result
-        } else {
-          AtomishUnset
-        }
-      }
-    }),
-    "fn"        -> QAlienProxy(ctd => {
+  def fn(activatable: Boolean) = {
+    QAlienProxy(ctd => {
       if(ctd.args.length == 0) {
         AlienProxy(_ => AtomishUnset)
       } else if(ctd.args.length == 1) {
@@ -232,9 +128,118 @@ class PreUniverse { self =>
           }
         })
         for(docs <- docstring) { fn.cells("documentation") = AtomishString(docs) }
+        fn.cells("activatable") = AtomishBoolean(activatable)
         fn
       }
+    })
+  }
+  var roots: MMap[String, AtomishThing] = MMap[String, AtomishThing](
+    "version" -> AtomishDecimal(0.1),
+    "say"     -> AlienProxy(_.args match {
+      case List(Left(AtomishString(x))) => {
+        println(x)
+        AtomishUnset
+      }
+      case x                            => {
+        println(x.toString())
+        AtomishUnset
+      }
     }),
+    "setCell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name)), Left(value: AtomishThing)) => {
+        self(AtomishPlace(AtomishMessage(name))) = Option(value)
+        value
+      }
+    }),
+    "cell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name))) => {
+        self(AtomishPlace(AtomishMessage(name))).get
+      }
+    }),
+    "hasCell"   -> AlienProxy(_.args match {
+      case List(Left(AtomishString(name))) => {
+        val thing = self(AtomishPlace(AtomishMessage(name)))
+        AtomishBoolean((thing != None) && (thing != Some(AtomishUnset)))
+      }
+    }),
+    "let"       -> QAlienProxy(ctd => {
+      var args = (ctd.args grouped(2) filter(_.length == 2) map((x: Array[AtomishCode]) => ((x(0) match {
+        case AtomishForm(things)   => things.filter(_ != AtomishNL)(0).asInstanceOf[AtomishMessage].name
+        case AtomishMessage(name)  => name
+      }), self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x(1)))))))).toMap;
+      var arrcode: Array[AtomishCode] = ((ctd.args grouped(2) filter(_.length == 1) flatMap((x: Array[AtomishCode]) => x)).toArray);
+      var code = arrcode(0)
+      scopes = (MMap() ++ args) +: scopes;
+      //println(code.toString())
+      var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
+      var sco = scopes.tail;
+      scopes = sco;
+      //println(result.toString())
+      //AtomishUnset
+      result
+    }),
+    "true"      -> AtomishBoolean(true),
+    "false"     -> AtomishBoolean(false),
+    "if"        -> QAlienProxy(ctd => {
+      if(ctd.args.length == 0) {
+        AtomishUnset
+      } else {
+        var real_arg_zero = ctd.args(0)
+        var it_name: Option[String] = (ctd.args(0) match {
+          case AtomishForm(List(AtomishMessage(maybe_name), x @_*)) => {
+            if(maybe_name.endsWith(":")) {
+              real_arg_zero = AtomishForm(x.toList)
+              Some(maybe_name.substring(0, maybe_name.length - 1))
+            } else {
+              None
+            }
+          }
+          case _                                                    => None
+        })
+        var test = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(real_arg_zero))))
+        if (
+          (test == AtomishBoolean(true)) ||
+          (test.cells.isDefinedAt("isTruthy") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isTruthy"))))) == AtomishBoolean(true))) ||
+          (test.cells.isDefinedAt("asBool") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(true)))
+          ) {
+          if(ctd.args.length >= 2) {
+            for(name <- it_name) {
+              scopes = MMap(name -> test) +: scopes;
+            }
+            var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(1)))));
+            if (it_name != None) {
+              var sco = scopes.tail;
+              scopes = sco;
+            }
+            result
+          } else {
+            AtomishUnset
+          }
+        } else if((ctd.args.length >= 3) && (
+          (test == AtomishBoolean(false)) ||
+          (test.cells.isDefinedAt("isFalsy") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("isFalsy"))))) == AtomishBoolean(true))) ||
+          (test.cells.isDefinedAt("asBool") &&
+            (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(test.cells("asBool"))))) == AtomishBoolean(false)))
+        )) {
+          for(name <- it_name) {
+            scopes = MMap(name -> test) +: scopes;
+          }
+          var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(2)))));
+          if (it_name != None) {
+            var sco = scopes.tail;
+            scopes = sco;
+          }
+          result
+        } else {
+          AtomishUnset
+        }
+      }
+    }),
+    "fn"        -> fn(true),
+    "fnx"       -> fn(false),
     "'"         -> QAlienProxy(ctd => {
       var quoted = AtomishCall("'", ctd.args)
       quoted.cells("asArray") = AlienProxy(_ => AtomishArray(ctd.args.asInstanceOf[Array[net.flaviusb.atomish.AtomishThing]]))
