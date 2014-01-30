@@ -468,7 +468,8 @@ case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (Ato
   }
 }
 
-class AtomishFnPre(code: AtomishThing, args: AtomishArray, activatable: Boolean = true, docstring: Option[String] = None) extends AlienProxy(null) with AtomishCode {
+class AtomishFnPre(code: AtomishThing, args: AtomishArray, activatable: Boolean = true, docstring: Option[String] = None) extends
+AlienProxy(null) with AtomishCode with IdempotentEval {
     cells("activatable") = AtomishBoolean(activatable)
     cells("code") = code
     cells("args") = args
