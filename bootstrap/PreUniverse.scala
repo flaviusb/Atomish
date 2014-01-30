@@ -6,44 +6,24 @@ class PreUniverse { self =>
   var gensyms: MMap[Int, AtomishThing] = MMap[Int, AtomishThing]()
   var currgs: Int = 1
   var scopes: MList[MMap[String, AtomishThing]] = MList() // New scopes go on the front of the list
-  def fn(activatable: Boolean) = {
-    QAlienProxy(ctd => {
-      if(ctd.args.length == 0) {
-        AlienProxy(_ => AtomishUnset)
-      } else if(ctd.args.length == 1) {
-        AlienProxy(_ => self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(0))))))
+  class AtomishFn(code: AtomishThing, args: AtomishArray, activatable: Boolean = true, docstring: Option[String] = None) extends
+  AtomishFnPre(code, args, activatable, docstring) {
+    override def activate(received_args: AtomishArgs): AtomishThing = {
+      val expected_args = cells("args") match {
+        case (x: AtomishArray) => x
+        case _                 => AtomishArray(Array()) // Should possible signal a condition here - malformed arglist condition?
+      }
+      val the_code = cells("code")
+      if(expected_args.value.length == 0) {
+        if(received_args.args.length == 0) {
+          self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(the_code))))
+        } else {
+          println("Received too many arguments: received " + received_args.args.length.toString() + " but expected 0.")
+          AtomishUnset
+        }
       } else {
-        // We have at least one arg and a body; that arg may be a docstring though
-        var (docstring: Option[String], args: Array[AtomishCode], code: AtomishCode) = (ctd.args(0) match {
-          case AtomishInterpolatedString(chunks) => {
-            var docstring: String = chunks.map(_ match {
-            case x: AtomishString => x
-            case x: AtomishCode   => (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x)))) match {
-                case y: AtomishString  => y
-                case AtomishInt(y)     => y.toString()
-                case AtomishDecimal(y) => y.toString()
-                case z                 => z.toString()
-              })}).mkString;
-            var args = ctd.args.drop(1).dropRight(1)
-            //println(args.toList)
-            var code = ctd.args.last
-            (Some(docstring), args, code)
-          }
-          case AtomishString(docstring) => {
-            var args = ctd.args.drop(1).dropRight(1)
-            //println(args.toList)
-            var code = ctd.args.last
-            (Some(docstring), args, code)
-          }
-          case _                        => {
-            var args = ctd.args.dropRight(1)
-            //println(args.toList)
-            var code = ctd.args.last
-            (None, args, code)
-          }
-        })
         // Trim leading newlines in each argument 
-        var trimmed_args = args.map(_ match {
+        var trimmed_args = expected_args.value.map(_ match {
           case AtomishForm(arg_chain) => {
             AtomishForm(arg_chain.dropWhile(_ == AtomishNL))
           }
@@ -83,53 +63,99 @@ class PreUniverse { self =>
           kwargs_a.map(x => x._2))
         val needed_positional_args = finargs.count(x => x._2 == None)
         val needed_keyword_args    = kwargs.count(x => x._2 == None)
-        var fn = AlienProxy(x => {
-          //println(finargs.toList)
-          //println(x.args)
-          val (fpositional_a: Array[Either[AtomishThing, (String, AtomishThing)]], fkeyword_a: Array[Either[AtomishThing, (String, AtomishThing)]]) = x.args.toArray.partition(_ match {
-            case _: Left[AtomishThing, (String, AtomishThing)]  => true
-            case _: Right[AtomishThing, (String, AtomishThing)] => false
-          })
-          val (fpositional: Array[AtomishThing], fkeyword: Array[(String, AtomishThing)]) = (fpositional_a.map(_.left.get),
-            fkeyword_a.map(_.right.get))
-          if((fpositional.length < needed_positional_args) || (fkeyword.length < needed_keyword_args)) {
-            println("Too few args.")
-            println("Got "+fpositional.length.toString()+" positional, needed "+needed_positional_args.toString())
-            println("Got "+fkeyword.length.toString()+" keyword, needed "+needed_keyword_args.toString())
-            println(finargs.toList.toString())
-            println(kwargs.toList.toString())
-            null // Should raise a condition - too few arguments
-          } else {
-            val slurped_positional_args: Array[AtomishThing] = (if(slurpy != None) { fpositional.drop(finargs.length) } else { Array() })
-            val slurped_keyword_args: Array[(AtomishThing, AtomishThing)] = (if(kwslurpy != None) { fkeyword.drop(kwargs.length) } else {
-            Array() }).map(a => (AtomishString(a._1), a._2))
-            val letified_args: Array[(String, AtomishThing)] = (fpositional.dropRight(slurped_positional_args.length).zip(finargs).map(a
-              => (a._2._1, a._1)) ++ finargs.drop(fpositional.length).map(a => (a._1, a._2.get)) ++ fkeyword.dropRight(slurped_keyword_args.length).zip(kwargs).map(a
-              => (a._2._1, a._1._2)) ++ kwargs.drop(fkeyword.length).map(a => (a._1, a._2.get)) ++ 
-              slurpy.map(a => (if(slurped_positional_args.length != 0) { (a._1, AtomishArray(slurped_positional_args)) } else if (a._2
-                != None) { (a._1,
-              a._2.get) } else { (a._1, AtomishArray(Array())) })) ++
-              kwslurpy.map(a => (if(slurped_keyword_args.length != 0) { (a._1, AtomishMap(MMap() ++ slurped_keyword_args)) } else if (a._2 !=
-                None) { (a._1,
-              a._2.get) } else { (a._1, AtomishMap(MMap[AtomishThing, AtomishThing]())) }))
-              ).map(a => (a._1,
-              self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(a._2 /*.asInstanceOf[AtomishThing]*/))))))
-              
-            scopes = (MMap() ++ letified_args) +: scopes;
-            //println(code.toString())
-            //println("Array(" + letified_args.map(ar => "(\"" + ar._1 + "\", " + ar._2.toString() + ")").mkString(", ") + ")")
-            //println(scopes)
-            var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
-            var sco = scopes.tail;
-            scopes = sco;
-            //println(result.toString())
-            //AtomishUnset
-            result
+        //println(finargs.toList)
+        //println(x.args)
+        val (fpositional_a: Array[Either[AtomishThing, (String, AtomishThing)]], fkeyword_a: Array[Either[AtomishThing, (String,
+          AtomishThing)]]) = received_args.args.toArray.partition(_ match {
+          case _: Left[AtomishThing, (String, AtomishThing)]  => true
+          case _: Right[AtomishThing, (String, AtomishThing)] => false
+        })
+        val (fpositional: Array[AtomishThing], fkeyword: Array[(String, AtomishThing)]) = (fpositional_a.map(_.left.get),
+          fkeyword_a.map(_.right.get))
+        if((fpositional.length < needed_positional_args) || (fkeyword.length < needed_keyword_args)) {
+          println("Too few args.")
+          println("Got "+fpositional.length.toString()+" positional, needed "+needed_positional_args.toString())
+          println("Got "+fkeyword.length.toString()+" keyword, needed "+needed_keyword_args.toString())
+          println(finargs.toList.toString())
+          println(kwargs.toList.toString())
+          null // Should raise a condition - too few arguments
+        } else {
+          val slurped_positional_args: Array[AtomishThing] = (if(slurpy != None) { fpositional.drop(finargs.length) } else { Array() })
+          val slurped_keyword_args: Array[(AtomishThing, AtomishThing)] = (if(kwslurpy != None) { fkeyword.drop(kwargs.length) } else {
+          Array() }).map(a => (AtomishString(a._1), a._2))
+          val letified_args: Array[(String, AtomishThing)] = (fpositional.dropRight(slurped_positional_args.length).zip(finargs).map(a
+            => (a._2._1, a._1)) ++ finargs.drop(fpositional.length).map(a => (a._1, a._2.get)) ++ fkeyword.dropRight(slurped_keyword_args.length).zip(kwargs).map(a
+            => (a._2._1, a._1._2)) ++ kwargs.drop(fkeyword.length).map(a => (a._1, a._2.get)) ++ 
+            slurpy.map(a => (if(slurped_positional_args.length != 0) { (a._1, AtomishArray(slurped_positional_args)) } else if (a._2
+              != None) { (a._1,
+            a._2.get) } else { (a._1, AtomishArray(Array())) })) ++
+            kwslurpy.map(a => (if(slurped_keyword_args.length != 0) { (a._1, AtomishMap(MMap() ++ slurped_keyword_args)) } else if (a._2 !=
+              None) { (a._1,
+            a._2.get) } else { (a._1, AtomishMap(MMap[AtomishThing, AtomishThing]())) }))
+            ).map(a => (a._1,
+            self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(a._2 /*.asInstanceOf[AtomishThing]*/))))))
+            
+          scopes = (MMap() ++ letified_args) +: scopes;
+          //println(code.toString())
+          //println("Array(" + letified_args.map(ar => "(\"" + ar._1 + "\", " + ar._2.toString() + ")").mkString(", ") + ")")
+          //println(scopes)
+          var result = self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(code))));
+          var sco = scopes.tail;
+          scopes = sco;
+          //println(result.toString())
+          //AtomishUnset
+          result
+        }
+      }
+
+    }
+  }
+
+  def fn(activatable: Boolean) = {
+    QAlienProxy(ctd => {
+      if(ctd.args.length == 0) {
+        new AtomishFn(AtomishUnset, AtomishArray(Array()), activatable)
+      } else if(ctd.args.length == 1) {
+        //AlienProxy(_ => self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(ctd.args(0))))))
+        new AtomishFn(ctd.args(0), AtomishArray(Array()), activatable)
+      } else {
+        // We have at least one arg and a body; that arg may be a docstring though
+        var (docstring: Option[String], args: Array[AtomishCode], code: AtomishCode) = (ctd.args(0) match {
+          case AtomishInterpolatedString(chunks) => {
+            var docstring: String = chunks.map(_ match {
+            case x: AtomishString => x
+            case x: AtomishCode   => (self.roots("eval").asInstanceOf[AlienProxy].activate(AtomishArgs(List(Left(x)))) match {
+                case y: AtomishString  => y
+                case AtomishInt(y)     => y.toString()
+                case AtomishDecimal(y) => y.toString()
+                case z                 => z.toString()
+              })}).mkString;
+            var args = ctd.args.drop(1).dropRight(1)
+            //println(args.toList)
+            var code = ctd.args.last
+            (Some(docstring), args, code)
+          }
+          case AtomishString(docstring) => {
+            var args = ctd.args.drop(1).dropRight(1)
+            //println(args.toList)
+            var code = ctd.args.last
+            (Some(docstring), args, code)
+          }
+          case _                        => {
+            var args = ctd.args.dropRight(1)
+            //println(args.toList)
+            var code = ctd.args.last
+            (None, args, code)
           }
         })
-        for(docs <- docstring) { fn.cells("documentation") = AtomishString(docs) }
-        fn.cells("activatable") = AtomishBoolean(activatable)
-        fn
+        // Trim leading newlines in each argument 
+        var trimmed_args: Array[AtomishThing] = args.map(_ match {
+          case AtomishForm(arg_chain) => {
+            AtomishForm(arg_chain.dropWhile(_ == AtomishNL))
+          }
+          case x                      => x
+        })
+        new AtomishFn(code, AtomishArray(trimmed_args), activatable, docstring)
       }
     })
   }

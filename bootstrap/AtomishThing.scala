@@ -468,6 +468,22 @@ case class shallowwrapstrtocode(call: AtomishString => AtomishCode) extends (Ato
   }
 }
 
+class AtomishFnPre(code: AtomishThing, args: AtomishArray, activatable: Boolean = true, docstring: Option[String] = None) extends AlienProxy(null) with AtomishCode {
+    cells("activatable") = AtomishBoolean(activatable)
+    cells("code") = code
+    cells("args") = args
+    for(documentation <- docstring) {
+      cells("documentation") = AtomishString(documentation)
+    }
+}
+
+object AtomishFnPre { // We need this to get around the case class to case class inheritance restriction
+    def unapply(the_fn: AtomishFnPre): Option[(AtomishThing, AtomishThing, AtomishThing, Option[AtomishThing])] = {
+      Some((the_fn.cells("code"), the_fn.cells("args"), the_fn.cells("activatable"), (if(the_fn.cells.isDefinedAt("documentation")) {
+        Some(the_fn.cells("documentation")) } else { None })))
+    }
+}
+
 
 case class AtomishArgs(args: List[Either[AtomishThing, (String, AtomishThing)]])
 

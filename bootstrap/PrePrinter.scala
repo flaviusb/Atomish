@@ -26,6 +26,11 @@ object PreScalaPrinter {
           x => x._1 + " -> " + print(x._2, print_form_explicit)
         ).mkString(", ") + "))"
       }
+      case AtomishFnPre(code, args, activatable, documentation) => {
+        "AtomishFn(" + print(code, print_form_explicit) + ", " +
+        print(args, print_form_explicit) + ", " + print(activatable, print_form_explicit) + (if(documentation == None) { "" } else { ", " +
+        print(documentation.get, print_form_explicit)})
+      }
       case x: AtomishThing         => x.toString()
     }
   }
