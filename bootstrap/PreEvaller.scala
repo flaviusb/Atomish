@@ -339,6 +339,9 @@ object PreEvaller {
         }).mkString)
       }
       case AtomishNL           => AtomishNL
+      case AtomishCommated(args) => {
+        throw new scala.MatchError("Match error - did not expect commated here - " + PreScalaPrinter.print_with_forms(AtomishCommated(args)))
+      }
     }
   }
 }

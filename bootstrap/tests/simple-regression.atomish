@@ -97,6 +97,9 @@ MOO = ["m", "o", "o"]
 MOO each(x, say(x))
 say(["oiu", "gerg"] [1])
 say(print([1]))
+say(print([]))
+say([2] length asText)
+say([] length asText)
 #;MOO = ["m"]
 #;MOO each(x, say(x))
 say(["oiu"] [0])

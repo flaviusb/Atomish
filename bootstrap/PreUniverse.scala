@@ -436,6 +436,9 @@ class PreUniverse { self =>
       }
     })*/
   )
+  // Aliases
+  roots("[]") = roots("Array")
+  roots("{}") = roots("Map")
   def recapply(base: AtomishThing, path: Seq[AtomishMessage]): Option[AtomishThing] =  path match {
     case Seq(AtomishMessage(first), rest @ _*) => {
       base match {
