@@ -102,7 +102,7 @@ object AtomishParser extends RegexParsers {
   def sstring: Parser[AtomishCode] = ("#[" ~ ((("""([^\]\\])""".r | sstring_escapes)*) ~ "]")) ^^ { case "#[" ~ (str ~ "]") => AtomishString(str.foldLeft("")(_ + _)) }
   def string: Parser[AtomishCode] = (sstring | qstring)
   def symbol: Parser[AtomishCall] = ":" ~ identifier ^^ { case ":" ~ symb => AtomishCall(":", Array(symb)) }
-  def identifier: Parser[AtomishMessage] = ("([_+]+[_+:]*)?[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+".r | "[]"
+  def identifier: Parser[AtomishMessage] = ("([_+]+[_+:]*)?[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*".r | "[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+[:~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]*".r | "[]"
     | "{}" | "…") ^^ { AtomishMessage(_) }
   def literal = ((regex: Parser[AtomishRegex]) | string | rational | integer | symbol | pct_w | square_array | square_map)
   def lside   = (literal | rside_bit)
