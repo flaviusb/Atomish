@@ -412,6 +412,9 @@ case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing wit
       case List(Left(x)) => {
         AtomishBoolean(value.contains(x))
       }
+    }),
+    "distinct"    -> AlienProxy(_ => {
+      AtomishArray(value.distinct)
     })
   )
 }
