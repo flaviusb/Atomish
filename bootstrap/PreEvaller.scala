@@ -158,6 +158,7 @@ object PreEvaller {
           }
           case None => {
             println("case None, for message: " + msg.toString())
+            println("with printed form: " + PreScalaPrinter.print(msg))
             throw new scala.MatchError(None)
           }
         }
@@ -179,6 +180,7 @@ object PreEvaller {
           }
           case None => {
             println("case None, for message: " + msg.toString())
+            println("with printed form: " + PreScalaPrinter.print(msg))
             throw new scala.MatchError(None)
           }
         }
@@ -197,6 +199,7 @@ object PreEvaller {
           }
           case None => {
             println("case None, for message: " + msg.toString())
+            println("with printed form: " + PreScalaPrinter.print(msg))
             throw new scala.MatchError(None)
           }
         }
@@ -218,6 +221,7 @@ object PreEvaller {
           }
           case None => {
             println("case None, for message: " + msg.toString())
+            println("with printed form: " + PreScalaPrinter.print(msg))
             throw new scala.MatchError(None)
           }
         }
@@ -240,6 +244,7 @@ object PreEvaller {
               }
               case None => {
                 println("case None, for message: " + msg.toString())
+                println("with printed form: " + PreScalaPrinter.print(msg))
                 throw new scala.MatchError(None)
               }
             }
@@ -261,6 +266,7 @@ object PreEvaller {
               }
               case None => {
                 println("case None, for message: " + msg.toString())
+                println("with printed form: " + PreScalaPrinter.print(msg))
                 throw new scala.MatchError(None)
               }
             }
