@@ -407,6 +407,11 @@ case class AtomishArray(var value: Array[AtomishThing]) extends AtomishThing wit
         value = x +: value
         AtomishUnset
       }
+    }),
+    "contains"  -> AlienProxy(_.args match {
+      case List(Left(x)) => {
+        AtomishBoolean(value.contains(x))
+      }
     })
   )
 }
