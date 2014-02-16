@@ -120,10 +120,11 @@ object PreEvaller {
           Left(eval(universe)(AtomishForm(chomped)))
         } else {
           val (arg::rest) = chomped;
-          val kwregex = "^([a-zA-Z0-9_!:?]+):$".r
+          val kwregex =
+            "^((?:(?:[_+]+[_+:]*)?[a-zA-Z][a-zA-Z0-9_:$!?%=<>-]*)|(?:[~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]+[:~!@$%^&*_=\'`/?×÷≠→←⇒⇐⧺⧻§∘≢∨∪∩□∀⊃∈+<>-]*)):$".r
           if(arg.isInstanceOf[AtomishMessage]) {
             arg.asInstanceOf[AtomishMessage].name match {
-              case kwregex(key) => Right(key, eval(universe)(AtomishForm(rest)))
+              case kwregex(key) => Right((key, eval(universe)(AtomishForm(rest))))
               case _            => Left(eval(universe)(all))
             }
           } else {
