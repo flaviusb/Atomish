@@ -11,7 +11,7 @@ shoff = Array(0, 0, 0, 0, 0, 0, 0, 0) #; 8 bytes
 flags = Array(0, 0, 0, 0)
 header_size = Array(0x40, 0) #; This is the size of 'elfheader in bytes
 phentsize = Array(0x38, 0) #; This is the number of bytes in a Elf64_Phdr struct, which can be found in the ELF specification
-phnum = Array(1, 0) #; 2 bytes
+phnum = Array(0, 0) #; 2 bytes
 shentsize = Array(0, 0) #; 2 bytes
 shnum = Array(0, 0) #; 2 bytes
 shstrindex = Array(0, 0) #; 2 bytes
@@ -22,6 +22,8 @@ num_to_bytes = fn("Converts a number to an array of bytes naively.", number, byt
 sq = macro(
   let(contents, arguments at(0),
       eval(unquote(''(fn(eval(unquote(''(`*(contents))))))))))
+
+add_program_header = fn(type: 1, flags: 5, offset: 0, 0)
 
 elfheader = sq(Array(`*(elfident),
   `*(file_type),
@@ -37,6 +39,8 @@ elfheader = sq(Array(`*(elfident),
   `*(shentsize),
   `*(shnum),
   `*(shstrindex)))
+
+pheader = sq(Array(
 
 say(print(elfheader))
 
