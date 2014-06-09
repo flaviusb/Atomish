@@ -50,7 +50,7 @@ object PreAtomishInterpreter {
       case "-i" => (Some("repl")      , None, repl)
       case "-h" => {
         println(help_string)
-        (None, None, "")
+        (None, None, AtomishString(""))
       }
       case file => (Some("file"), Some(file), AtomishString(""))
     }
