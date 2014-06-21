@@ -137,20 +137,6 @@ object AtomishParser extends RegexParsers {
     case a ~ List(x) => x
     case a ~ x       => AtomishForm(x)
   }))
-  /*def code_tiny_bit: Parser[AtomishCode] = (comment | at_square | regex | commated | atomish_call | string | rational | integer | symbol | pct_w | identifier
-    | flagcheck | nll) // This will eventually be a big union of all types that can constitute standalone code
-  def code_bit: Parser[List[AtomishCode]] = (((wss*) ~ code_tiny_bit)*) ^^ { _.flatMap { 
-    case x ~ (code_piece: AtomishCode)         => List(code_piece)
-  } }
-  def code: Parser[AtomishCode] = code_tiny_bit ~ code_bit ^^ {
-    case a ~ b => {
-      if((b == List(AtomishNL)) || (b == List())) {
-        a
-      } else {
-        AtomishForm(a::b)
-      }
-    }
-  }*/
   def commated_bit: Parser[List[AtomishCode]] = (("," ~ (wss?) ~ code)*) ^^ { _.map { case "," ~ x ~ frag => frag } }
   def commated: Parser[AtomishCommated] = "(" ~ (wss?) ~ ((code ~ (wss?) ~ commated_bit)?) ~ (wss?) ~ ")" ^^ {
     case opb ~ wsa ~ Some((code1: AtomishCode) ~ wsb ~ (code2: List[AtomishCode])) ~ wsc ~ opc => AtomishCommated(Array[AtomishCode](code1) ++
