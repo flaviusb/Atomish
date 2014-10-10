@@ -1,0 +1,1 @@
+Edges is an idea for a tool that reifies the edges of kernels. This can be used as part of principled FFI and external wrapping tools, and is also used so that the parts of Atomish theat need to use the machine don't leak out all over the place.
