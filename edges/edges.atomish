@@ -1,16 +1,18 @@
 stubs = {}
 
-#;print_stubs_map = fn(the_map,
-#;  "{ #{the_map keys map(key, "\"#{key}\" ⇒ \"#{the_map [key]}\"") join(",\n")} }")
-
 process = fn(file_name, 
-  let(contents, (FileSystem readFully(file_name) ~= /[a-zA-Z_]*/) [0],
-    stubs at=(contents, "    call " + contents))
+  let(contents, use(file_name),
+    stubs = stubs + contents)
 )
 
 edge_files = System programArguments
 edge_files each(file, process(file))
 
-say("Stubs = Origin with(
-  stubs: #{print_atomish(stubs)}, 
-  call_stub: fn(name, Stubs stubs [name]))")
+Stubs = Origin with(
+  stub:     stubs,
+  call_stub: fn(name,
+    let(the_stub, Stubs stub [name],
+      case(the_stub ["type"],
+        "native", "    call #{the_stub ["sym_name"]}\n")))
+)
+say("Stubs = #{print_atomish(Stubs)}")

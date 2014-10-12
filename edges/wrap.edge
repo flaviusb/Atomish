@@ -1,1 +1,16 @@
-native_func
+{
+  native_func: {
+    sym_name: "native_func",
+    type:     "native",
+    ⇒(:in,  :none),
+    ⇒(:out, :none),
+    varargs:  false
+  },
+  printf: {
+    sym_name: "printf",
+    type:     "native",
+    ⇒(:in,  :charptr),
+    ⇒(:out, :int),
+    varargs:  true
+  }
+}
