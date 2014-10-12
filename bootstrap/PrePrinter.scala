@@ -54,6 +54,9 @@ object PreScalaPrinter {
           x => print_atomish(x._1) + " ⇒ " + print_atomish(x._2)
         ).mkString(", ") + "}"
       }
+      case AtomishCall(":", Array(AtomishMessage(symb))) => {
+        ":" + symb
+      }
       case AtomishCall(call, args) => {
         call + "(" + args.map(x => print_atomish(x)).mkString(", ") + ")"
       }
@@ -70,13 +73,25 @@ object PreScalaPrinter {
       case AtomishFnPre(code, AtomishArray(args), AtomishBoolean(activatable), documentation) => {
         (if(activatable) {"fn("} else {"fnx("}) + (if(documentation == None) { "" } else {
           print_atomish(documentation.get) + ", "}) + args.map(arg => print_atomish(arg)).mkString(", ") + ", " +
-        print_atomish(code)
+        print_atomish(code) + ")"
       }
       case AtomishString(str) => {
         "\"" + atomish_qstring_escape(str) + "\""
       }
       case AtomishBoolean(bool) => {
         bool.toString()
+      }
+      case AtomishMessage(msg)  => {
+        msg
+      }
+      case AtomishSymbol(symb)  => {
+        ":" + symb
+      }
+      case AtomishInterpolatedString(chunks) => {
+        "\"" + (chunks.map {
+          case AtomishString(str) => atomish_qstring_escape(str)
+          case x                  => "#{" + print_atomish(x) + "}"
+        }).mkString + "\""
       }
       case x: AtomishThing         => x.toString()
     }
