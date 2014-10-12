@@ -35,4 +35,50 @@ object PreScalaPrinter {
     }
   }
   def print_with_forms = print(_: AtomishThing, true)
+  def atomish_qstring_escape(str: String): String = {
+    str.flatMap {
+      case '\n' => "\\n"
+      case '\r' => "\\r"
+      case '\\' => "\\\\"
+      case '"'  => "\\\""
+      case x    => s"$x"
+    }
+  }
+  def print_atomish(thing: AtomishThing): String = {
+    return thing match {
+      case AtomishArray(arr)       => {
+        "[" + arr.map(x => print_atomish(x)).mkString(", ") + "]"
+      }
+      case AtomishMap(amap)        => {
+        "{" + amap.map(
+          x => print_atomish(x._1) + " ⇒ " + print_atomish(x._2)
+        ).mkString(", ") + "}"
+      }
+      case AtomishCall(call, args) => {
+        call + "(" + args.map(x => print_atomish(x)).mkString(", ") + ")"
+      }
+      case AtomishCommated(tuple)  => "(" + tuple.map(x => print_atomish(x)).mkString(", ") + ")"
+      case AtomishForm(x)          => {
+        x.map(part => print_atomish(part)).mkString(" ")
+      }
+      case AtomishNL               => " . "
+      case AtomishOrigin(cells)    => {
+        "Origin with(" + cells.map(
+          x => x._1 + ":  " + print_atomish(x._2)
+        ).mkString(", ") + ")"
+      }
+      case AtomishFnPre(code, AtomishArray(args), AtomishBoolean(activatable), documentation) => {
+        (if(activatable) {"fn("} else {"fnx("}) + (if(documentation == None) { "" } else {
+          print_atomish(documentation.get) + ", "}) + args.map(arg => print_atomish(arg)).mkString(", ") + ", " +
+        print_atomish(code)
+      }
+      case AtomishString(str) => {
+        "\"" + atomish_qstring_escape(str) + "\""
+      }
+      case AtomishBoolean(bool) => {
+        bool.toString()
+      }
+      case x: AtomishThing         => x.toString()
+    }
+  }
 }

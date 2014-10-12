@@ -30,6 +30,10 @@ object PreAtomishInterpreter {
     case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print(arg))
     case _                             => null // Should error
   })
+  u.roots("print_atomish") = AlienProxy(_.args match {
+    case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print_atomish(arg))
+    case _                             => null // Should error
+  })
   u.roots("print_with_forms") = AlienProxy(_.args match {
     case List(Left(arg: AtomishThing)) => AtomishString(PreScalaPrinter.print_with_forms(arg))
     case _                             => null // Should error
