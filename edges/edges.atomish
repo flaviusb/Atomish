@@ -1,0 +1,16 @@
+stubs = {}
+
+print_stubs_map = fn(the_map,
+  "{ #{the_map keys map(key, "\"#{key}\" ⇒ \"#{the_map [key]}\"") join(",\n")} }")
+
+process = fn(file_name, 
+  let(contents, (FileSystem readFully(file_name) ~= /[a-zA-Z_]*/) [0],
+    stubs at=(contents, {code: "call #{contents}\n", alignment: 16}))
+)
+
+edge_files = System programArguments
+edge_files each(file, process(file))
+
+say("Stubs = Origin with(
+  stubs: #{print_stubs_map(stubs)}, 
+  call_stub: fn(name, Stubs stubs [name]))\n")
