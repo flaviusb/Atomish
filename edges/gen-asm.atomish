@@ -1,9 +1,8 @@
 GenAsm = Origin with(
-  header: "    .globl _start\n    .text\n",
-  start:  "_start:\n",
-  exit:   fn(retval,
+  header: "    .globl main\n    .text\n",
+  start_main:  "main:\n",
+  exit_main:   fn(retval,
     "    # exit(#{retval asText})\n" +(
-    "    mov $60, %rax\n" +(
-    "    mov $#{retval asText}, %rdi\n" +(
-    "    syscall\n"))))
+    "    mov $#{retval asText}, %rax\n" +(
+    "    ret\n")))
 )
